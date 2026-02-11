@@ -5,7 +5,7 @@
 !README.md
 !LICENSE
 !CLAUDE.md
-!settings.json
+!settings.example.json
 !agents/
 !agents/**
 !skills/
