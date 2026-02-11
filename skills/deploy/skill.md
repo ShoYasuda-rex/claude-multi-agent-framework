@@ -80,7 +80,7 @@ ARCHITECTURE.md も存在しない場合、AskUserQuestion で以下を聞く:
 - `HTTPS（https://github.com/）`
 
 **質問B: GitHubリポジトリ（user/repo 形式）**
-- Other で直接入力（例: `ShoYasuda-rex/nodoka-career`）
+- Other で直接入力（例: `user/my-project`）
 
 選択に応じて URL を組み立てる:
 - SSH → `git remote add {remote} git@github.com:{user/repo}.git`
@@ -110,7 +110,7 @@ CLAUDE.md の Git 運用セクションに「FTP」「GitHub Actions」「deploy
 AskUserQuestion で以下を聞く（1回の呼び出しにまとめる）:
 
 **質問A: FTPサーバーのホスト名**
-- Other で直接入力（例: `goodtomorrow.co.jp`）
+- Other で直接入力（例: `example.com`）
 
 **質問B: FTPのアップロード先ディレクトリ**
 - `/public_html`（Recommended）
