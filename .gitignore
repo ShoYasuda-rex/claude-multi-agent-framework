@@ -1,0 +1,14 @@
+# 全部無視
+*
+# これだけ追跡
+!.gitignore
+!README.md
+!LICENSE
+!CLAUDE.md
+!settings.json
+!agents/
+!agents/**
+!skills/
+!skills/**
+!docs/
+!docs/**
