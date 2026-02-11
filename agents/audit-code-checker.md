@@ -55,6 +55,12 @@ Perform a comprehensive full-code check on the project, covering all categories 
 - **Duplicate code (copy-paste)**: Identify suspiciously similar code blocks across different files
   - Look for functions/blocks with 10+ similar lines
   - Report file locations and the duplicated logic
+- **重複ロジック検出**: コードが異なっていても同じ処理パターンを繰り返している箇所を検出
+  - 例: 同じバリデーション処理、同じデータ変換処理、同じエラーハンドリングパターンが複数ファイルに散在
+  - コピペではなく「同じ意図の処理」が重複しているケースを特定する
+- **共通化の提案**: 重複コード・重複ロジックの検出結果に基づき、ユーティリティ関数やモジュールへの切り出し候補を提案
+  - 3箇所以上で使われている同一パターンは優先度高
+  - 切り出し先のファイル名・関数名の案も提示する
 
 ### Phase 6: Security（セキュリティ）
 - セキュリティチェックは **audit-security-checker** が担当するため、本エージェントではスキップする。
@@ -68,6 +74,11 @@ Perform a comprehensive full-code check on the project, covering all categories 
 - **Abandoned TODOs**: Find all `TODO`, `FIXME`, `HACK`, `XXX`, `TEMP`, `WORKAROUND` comments
   - Report file, line number, and the comment content
   - Flag ones that appear to be very old (if git blame is available)
+- **マジックナンバー・ハードコード検出**:
+  - コード中に直接埋め込まれた数値リテラル（0, 1, -1, 空文字列を除く）を検出
+  - ハードコードされたURL、ファイルパス、タイムアウト値、リトライ回数、閾値などの設定値を検出
+  - 定数定義・環境変数・設定ファイルへの切り出しを推奨する
+  - 例: `if (items.length > 50)` → `const MAX_ITEMS = 50`
 - **Oversized code**:
   - Functions longer than 50 lines
   - Files longer than 500 lines
@@ -165,6 +176,12 @@ The report must follow this structure:
 ### 4.3 重複コード
 [file1:lines ↔ file2:lines - similarity description]
 
+### 4.4 重複ロジック
+[処理パターン名 - 該当箇所一覧 - 処理の概要]
+
+### 4.5 共通化の提案
+[切り出し候補 - 対象箇所 - 推奨ファイル名/関数名 - 優先度(高/中/低)]
+
 ## 5. セキュリティ
 → **audit-security-checker** の監査結果を参照してください。
 
@@ -175,7 +192,10 @@ The report must follow this structure:
 ### 6.2 TODO/FIXME/HACKコメント
 [file:line - comment content]
 
-### 6.3 長すぎる関数・ファイル
+### 6.3 マジックナンバー・ハードコード値
+[file:line - 値 - 推奨定数名/切り出し先]
+
+### 6.4 長すぎる関数・ファイル
 [file:line - name - line count]
 
 ## 7. リントチェック

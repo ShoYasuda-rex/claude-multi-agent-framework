@@ -48,6 +48,9 @@ Perform a systematic security review following this checklist:
 - Error message information disclosure
 - Real-time communication security (SSE, WebSocket, etc.)
 - Request/response size limits
+- **ヘルスチェック/管理エンドポイント**: 認証なしで内部情報（バージョン、DB状態、環境変数等）を露出していないか、デバッグ用エンドポイントが本番に残っていないか
+- **外部サービス呼び出しのタイムアウト**: タイムアウト未設定のHTTPクライアントがDoSベクタになっていないか（攻撃者が遅いレスポンスを返す外部URLを注入→スレッド/接続枯渇）
+- **リソース枯渇型DoS**: N+1クエリ、無制限のページネーション、大量データ返却等がリソース枯渇を引き起こすエンドポイント
 
 ### 5. Client-Side Security
 - Client-side storage sensitive data exposure (localStorage, sessionStorage, IndexedDB, cookies)
@@ -65,6 +68,13 @@ Perform a systematic security review following this checklist:
 - Data synchronization security (client ↔ server)
 - Export data handling (PDF, CSV, etc.)
 
+### 6.5. セキュリティログ・監査証跡
+- **セキュリティイベントのログ記録**: 認証失敗、権限エラー、不正アクセス試行、パスワード変更等のセキュリティイベントが適切にログ出力されているか
+- **エラー握りつぶし**: catchブロックでセキュリティ関連エラーを無視・console.logだけで流している箇所（攻撃の兆候を見逃す原因）
+- **ログへの機密情報混入**: パスワード、トークン、PII、クレジットカード番号等がログに出力されていないか
+- **ログレベルの適切性**: セキュリティイベントがdebug/infoレベルになっていて本番で出力されないリスク
+- **ログの改ざん耐性**: ログインジェクション（改行挿入による偽ログ生成）の可能性
+
 ### 7. Infrastructure-Specific
 - Adapt checks based on the project's infrastructure (identified from CLAUDE.md):
   - **Serverless** (Cloudflare Workers, AWS Lambda, etc.): middleware bypass, env var handling, timeout abuse
@@ -79,6 +89,8 @@ Perform a systematic security review following this checklist:
 - HTTPS enforcement
 - .dev.vars or secrets in repository
 - Supply chain security: `npm audit` / `bundler-audit` / `pip-audit` 等で既知脆弱性を検出
+- **依存ライブラリの保守状態**: メンテ停止・非推奨のライブラリはセキュリティパッチが適用されないリスク。最終リリース日、既知CVEの未修正状況を確認
+- **ハードコードされたシークレット・設定値**: API URL、認証情報、暗号鍵、閾値（レート制限値等）がコード中に直書きされていないか。環境変数・設定ファイルへの外部化を確認
 - Secrets in git history: API keys, passwords, tokens がコミット履歴に含まれていないか確認（`git log -p` での検索）
 - SSRF (Server-Side Request Forgery): ユーザー入力がURL/IPとして使われる箇所
 - Race conditions: 認証チェックと処理実行の間のTOCTOU、並行リクエストによる二重処理

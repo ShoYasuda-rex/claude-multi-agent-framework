@@ -55,6 +55,15 @@
 
 
 
+\# Bashツール
+
+\- Platform: win32 でも Bashツールは /usr/bin/bash（Git Bash）で動作する
+\- 常にbash構文を使う（mkdir -p, rm -f, ls 等）
+\- Windows CMD構文は禁止（if not exist, dir, copy 等）
+\- Windows固有の操作が必要な場合は bash内から `powershell -Command "..."` で呼ぶ
+
+
+
 \# エラーの学習
 
 \- 技術的なエラーを修正したら rules\\learned.md に記録する
