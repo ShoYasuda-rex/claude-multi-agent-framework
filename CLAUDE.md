@@ -11,9 +11,7 @@
 * .vc → visual-checker サブエージェントを呼び出す（引数なし→直前の実装を検証、引数あり→指定箇所を検証）
 * .spc → audit-spec-checker サブエージェントを呼び出す（仕様適合チェック）
 * .cod → audit-code-checker サブエージェントを呼び出す（全体コード監査）
-* .cod-dx → Codex CLI で全体コード監査を実行する（.cod相当のプロンプトをCodexに渡して実行）
 * .sec → audit-security-checker サブエージェントを呼び出す（セキュリティ監査）
-* .sec-dx → Codex CLI でセキュリティ監査を実行する（.sec相当のプロンプトをCodexに渡して実行）
 * .arc → audit-architecture-checker サブエージェントを呼び出す（アーキテクチャ設計監査）
 * .tck → Agent Teams で統合監査を実行する。3人のチームメイトを起動し、コード品質（.cod相当）・仕様適合（.spc相当）・セキュリティ（.sec相当）を並列で監査する。チームメイト同士が指摘の競合を議論する。指摘が矛盾する場合はチーム内で合意形成してから報告する。
 
@@ -52,8 +50,6 @@
 \# プロジェクトCLAUDE.mdの更新
 
 \- 構造・設計に関わる変更をしたら、プロジェクトのCLAUDE.mdに反映する
-
-
 
 
 

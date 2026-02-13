@@ -6,13 +6,6 @@
   "enabledPlugins": {
     "playwright@claude-plugins-official": true
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "AskUserQuestion",
-      }
-    ]
-  },
   "permissions": {
     "allow": [
       "Bash(curl *ntfy.sh*)"
