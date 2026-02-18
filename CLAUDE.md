@@ -13,6 +13,7 @@
 * .cod → audit-code-checker サブエージェントを呼び出す（全体コード監査）
 * .sec → audit-security-checker サブエージェントを呼び出す（セキュリティ監査）
 * .arc → audit-architecture-checker サブエージェントを呼び出す（アーキテクチャ設計監査）
+* .log → log-checker サブエージェントを呼び出す（Herokuログ分析・障害予兆検出）
 * .tck → Agent Teams で統合監査を実行する。3人のチームメイトを起動し、コード品質（.cod相当）・仕様適合（.spc相当）・セキュリティ（.sec相当）を並列で監査する。チームメイト同士が指摘の競合を議論する。指摘が矛盾する場合はチーム内で合意形成してから報告する。
 
 
@@ -59,6 +60,14 @@
 \- 常にbash構文を使う（mkdir -p, rm -f, ls 等）
 \- Windows CMD構文は禁止（if not exist, dir, copy 等）
 \- Windows固有の操作が必要な場合は bash内から `powershell -Command "..."` で呼ぶ
+
+
+
+\# スクリーンショット管理
+
+\- Playwright スクリーンショットは必ず `check_log/screenshots/` に保存する（ルートに直接 PNG を置かない）
+\- `browser_take_screenshot` の filename には `check_log/screenshots/` プレフィックスを付ける
+\- ディレクトリが存在しない場合は事前に `mkdir -p check_log/screenshots` で作成する
 
 
 
