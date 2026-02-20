@@ -13,6 +13,7 @@
 * .sec → audit-security-checker サブエージェントを呼び出す（セキュリティ監査）
 * .arc → audit-architecture-checker サブエージェントを呼び出す（アーキテクチャ設計監査）
 * .log → log-checker サブエージェントを呼び出す（Herokuログ分析・障害予兆検出）
+* .law → law-checker サブエージェントを呼び出す（引数なし→プロダクト全体、引数あり→指定箇所を法令チェック）
 
 
 
