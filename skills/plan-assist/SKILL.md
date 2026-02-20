@@ -1,6 +1,7 @@
 ---
 name: plan-assist
 description: ドキュメントを読み込んで実装計画を相談
+user_invocable: true
 disable-model-invocation: true
 argument-hint: ""
 ---

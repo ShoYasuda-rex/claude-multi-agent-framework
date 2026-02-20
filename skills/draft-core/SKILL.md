@@ -1,6 +1,7 @@
 ---
 name: draft-core
 description: プロダクトの本質（誰の・何の課題）を整理
+user_invocable: true
 disable-model-invocation: true
 argument-hint: "[プロジェクト名 または 要件ドキュメントのパス]"
 ---

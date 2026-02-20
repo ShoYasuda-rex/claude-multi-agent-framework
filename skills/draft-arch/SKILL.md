@@ -1,6 +1,7 @@
 ---
 name: draft-arch
 description: 実装前のアーキテクチャ設計
+user_invocable: true
 disable-model-invocation: true
 argument-hint: "[プロジェクト名 または 要件ドキュメントのパス]"
 ---

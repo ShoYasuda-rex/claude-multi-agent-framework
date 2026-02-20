@@ -1,6 +1,7 @@
 ---
 name: draft-spec
 description: サービス仕様方針（UX・振る舞い）を整理
+user_invocable: true
 disable-model-invocation: true
 argument-hint: "[プロジェクト名 または 要件ドキュメントのパス]"
 ---

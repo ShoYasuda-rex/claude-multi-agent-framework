@@ -38,7 +38,6 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
 
 | コマンド | 役割 |
 |---------|------|
-| `.sc` | 変更前に影響範囲を調査 |
 | `.tpi` | 並列実装（サブエージェント or Agent Teams を自動選択） |
 
 **検証（テストコードの代替）**
@@ -56,7 +55,6 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
 | `.cod` | コード全体監査 |
 | `.sec` | セキュリティ監査 |
 | `.arc` | アーキテクチャ設計監査 |
-| `.tck` | 上3つを並列で一括実行（Agent Teams） |
 | `.cod-dx` / `.sec-dx` | Codex CLIでダブルチェック |
 
 **その他**
@@ -65,7 +63,7 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
 |---------|------|
 | `/deploy` | add → commit → push |
 | `/guide` | 今やるべきことを案内 |
-| `/full-auto-team` | AIチームが自律的に改善を永続実行 |
+| `/research-team` | 3視点調査（実装モード付き） |
 
 ## 開発フロー
 
@@ -74,7 +72,7 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
     ↓
   .tpi（並列実装）→ .cc（静的検証）→ .vc（動作確認）→ /deploy
     ↓
-  .cod / .sec / .tck（監査） → 改善 → 繰り返し
+  .cod / .sec（監査） → 改善 → 繰り返し
 ```
 
 迷ったら `/guide` と打てば、プロジェクトの状態を見て次にやることを教えてくれる。

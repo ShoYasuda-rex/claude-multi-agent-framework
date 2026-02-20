@@ -8,7 +8,7 @@ user_invocable: true
 # /test-assist — 自然言語からPlaywrightテスト自動生成
 
 「テストしたい操作を日本語で言うだけ」でE2Eテストコードを生成するスキル。
-操作を再現→検証→テストコード化まで一貫して行い、以降 `.cc` や `.tck` で自動実行される。
+操作を再現→検証→テストコード化まで一貫して行い、以降 `.cc` で自動実行される。
 
 ---
 
@@ -201,7 +201,7 @@ npx playwright test tests/test-assist/{filename} --reporter=list
 - アサーション: {M}個
 - 実行結果: PASS
 
-.cc および .tck で自動チェックされます。
+.cc で自動チェックされます。
 ```
 
 ---
