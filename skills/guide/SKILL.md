@@ -70,8 +70,6 @@ AskUserQuestion で聞く:
 
 \- `docs/CORE.md` の有無
 
-\- `docs/SPEC.md` の有無
-
 \- `docs/ARCHITECTURE.md` の有無
 
 \- `src/` or `app/` 等のコードディレクトリの有無
@@ -96,7 +94,7 @@ AskUserQuestion で聞く:
 
 ```
 
-今の状態: CORE.md ✓ / SPEC.md ✓ / ARCHITECTURE.md ✗ / コード ✗
+今の状態: CORE.md ✓ / ARCHITECTURE.md ✗ / コード ✗
 
 
 
@@ -104,11 +102,9 @@ AskUserQuestion で聞く:
 
 1\. /draft-arch — 技術構成を決める
 
-2\. /plan-assist — 実装計画を立てる
+2\. .tpi — 実装
 
-3\. .tpi — 実装
-
-4\. .cc — 検証
+3\. .cc — 検証
 
 
 
@@ -168,13 +164,9 @@ AskUserQuestion で聞く:
 
 | `/draft-core` | プロダクトの本質を整理 → docs/CORE.md | なし |
 
-| `/draft-spec` | 体験の方針を整理 → docs/SPEC.md | CORE.md |
-
-| `/draft-arch` | 技術構成を設計 → docs/ARCHITECTURE.md | SPEC.md |
+| `/draft-arch` | 技術構成を設計 → docs/ARCHITECTURE.md | CORE.md |
 
 | `/draft-arch ファイルパス` | 外部ドキュメントからARCHITECTURE.mdを生成 | なし |
-
-| `/plan-assist` | 実装計画を対話で整理 | できればCORE/SPEC/ARCH |
 
 | `/gen-arch` | 既存コードからアーキテクチャドキュメントを自動生成 | コードが存在 |
 
@@ -217,17 +209,15 @@ AskUserQuestion で聞く:
 
 |---------|---------|------|
 
-| `.spc` | 仕様との整合性チェック | CORE/SPEC/ARCHのいずれか |
+| `.spc` | 仕様との整合性チェック | CORE/ARCHのいずれか |
 
 | `.cod` | コード全体監査 | コードが存在 |
 
-| `.cod-dx` | コード全体監査（Codex版） | コードが存在 |
-
 | `.sec` | セキュリティ監査 | コードが存在 |
 
-| `.sec-dx` | セキュリティ監査（Codex版） | コードが存在 |
-
 | `.arc` | アーキテクチャ設計監査 | コードが存在 |
+
+| `.law` | 法令遵守チェック（景品表示法・特商法等） | コードが存在 |
 
 
 
@@ -256,13 +246,6 @@ AskUserQuestion で聞く:
 
 | `/load-issues` | ためたissueを調査・実装 |
 
-| `/save-plan` | 計画を保存 |
-
-| `/load-plans` | 保存した計画を読み込み・実行 |
-
-| `/save-memo` | メモを即記録 |
-
-| `/load-memos` | メモを一括エクスポート |
 
 
 
@@ -294,9 +277,25 @@ AskUserQuestion で聞く:
 
 | `/local` | ローカルサーバー起動・ブラウザで開く | 開発サーバーが設定済み |
 
-| `/full-auto-team` | AIチームが自律的に改善を永続実行 | モックアップが動いている |
+| `/market-team` | 3視点でGo-to-Market戦略調査 | なし |
+
+| `/ops-check` | 本番運用の準備状況を診断 | 初回デプロイ前 |
 
 | `/research-team` | 3視点で並列調査・統合報告 | なし |
+
+
+
+\*\*学習\*\*
+
+
+
+| コマンド | 何をする | 前提 |
+
+|---------|---------|------|
+
+| `/feature-trainer` | 小さなプロダクト1つで開発フローの型を学ぶ | なし |
+
+| `/fullstack-trainer` | DB+API+Workersでフルスタック開発の型を学ぶ | /feature-trainer修了 |
 
 
 
@@ -308,15 +307,11 @@ AskUserQuestion で聞く:
 
 1\. `/draft-core` — プロダクトの本質を整理
 
-2\. `/draft-spec` — 体験の方針を決める
+2\. `/draft-arch` — 技術構成を決める
 
-3\. `/draft-arch` — 技術構成を決める
+3\. `.tpi` — 実装
 
-4\. `/plan-assist` — 最初の実装計画を立てる
-
-5\. `.tpi` — 実装
-
-6\. `.cc` — 検証
+4\. `.cc` — 検証
 
 
 
@@ -324,23 +319,17 @@ AskUserQuestion で聞く:
 
 1\. `/draft-core 要件定義書.md` — ドキュメントからCore抽出
 
-2\. `/draft-spec` — 体験の方針を決める
+2\. `/draft-arch 要件定義書.md` — ドキュメントからARCH生成
 
-3\. `/draft-arch 要件定義書.md` — ドキュメントからARCH生成
-
-4\. `/plan-assist` — 実装計画
-
-5\. `.tpi` — 実装
+3\. `.tpi` — 実装
 
 
 
 \*\*既存プロジェクトに機能追加\*\*
 
-1\. `/plan-assist` — 何を実装するか整理
+1\. `.tpi` — 実装
 
-2\. `.tpi` — 実装
-
-4\. `.cc` — 検証
+2\. `.cc` — 検証
 
 5\. `.vc` — ブラウザで動作確認
 
@@ -366,13 +355,7 @@ AskUserQuestion で聞く:
 
 \- 設計の妥当性: `.arc`
 
-\- 別モデルでダブルチェック: `.cod-dx` / `.sec-dx`
-
-
-
-\*\*自動で改善を回したい\*\*
-
-\- `/full-auto-team` — モックアップが動いている前提
+\- 法令遵守: `.law`
 
 
 
@@ -386,9 +369,13 @@ AskUserQuestion で聞く:
 
 \*\*途中経過を残したい\*\*
 
-\- 計画を保存: `/save-plan` → 別セッションで `/load-plans`
-
-\- メモ: `/save-memo` → `/load-memos`
-
 \- 課題: `/save-issue` → `/load-issues`
+
+
+
+\*\*開発の進め方を学びたい\*\*
+
+\- フレームワーク初心者: `/feature-trainer`（フロントのみ、3日で完走）
+
+\- フルスタックに進みたい: `/fullstack-trainer`（DB+API+Workers、3日で完走）
 

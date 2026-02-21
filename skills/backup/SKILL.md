@@ -24,6 +24,21 @@ disable-model-invocation: true
 
 - `.git` がなければ `git init` を実行
 
+### 2.5. dependabot.yml の確認・生成
+
+- `.github/dependabot.yml` が存在しなければ作成:
+  - `mkdir -p .github`
+  - プロジェクトの技術スタックを探索し、該当する `package-ecosystem` を自動判定:
+    - `Gemfile` → `bundler`
+    - `package.json` → `npm`
+    - `composer.json` → `composer`
+    - `requirements.txt` / `Pipfile` → `pip`
+    - `go.mod` → `gomod`
+    - `Dockerfile` → `docker`
+    - `pom.xml` / `build.gradle` → `maven` / `gradle`
+    - `.github/workflows/` → `github-actions`
+  - 検出されたエコシステムごとに `updates` エントリを生成（schedule: weekly）
+
 ### 3. `.gitignore` の確認・補完
 
 - プロジェクトを探索し、以下を確認:

@@ -1,6 +1,6 @@
 ---
 name: log-checker
-description: "本番ログを分析し、障害の予兆を検出する軽量エージェント。プロジェクトのCLAUDE.mdからデプロイ先を自動判定し、プラットフォームに応じたチェックを行う。\n\nExamples:\n\n<example>\nuser: \"ログチェックして\"\nassistant: \"log-checker エージェントでログを分析します。\"\n</example>\n\n<example>\nuser: \".log\"\nassistant: \"log-checker エージェントを起動します。\"\n</example>"
+description: "Lightweight agent that analyzes production logs and detects early signs of failures. Auto-detects deployment platform from CLAUDE.md and performs platform-specific checks.\n\nExamples:\n\n<example>\nuser: \"ログチェックして\"\nassistant: \"log-checker エージェントでログを分析します。\"\n</example>\n\n<example>\nuser: \".log\"\nassistant: \"log-checker エージェントを起動します。\"\n</example>"
 model: sonnet
 color: green
 memory: project

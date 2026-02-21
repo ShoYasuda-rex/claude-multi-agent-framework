@@ -1,6 +1,6 @@
 ---
 name: code-checker
-description: "コード検証。引数なし→直前の実装を検証、引数あり→指定箇所を検証"
+description: "Code verification. No args → verify last implementation, with args → verify specified location"
 model: sonnet
 color: green
 ---

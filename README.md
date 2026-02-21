@@ -17,8 +17,8 @@
 ## 仕様の3層構造
 
 ```
-CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
-  変わらない本質    体験の方針        技術構成
+CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
+  変わらない本質              技術構成
 ```
 
 最初から完璧を目指さない。動くものから逆算する。
@@ -30,9 +30,7 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
 | コマンド | 役割 |
 |---------|------|
 | `/draft-core` | プロダクトの本質を整理 |
-| `/draft-spec` | 体験の方針を整理 |
 | `/draft-arch` | 技術構成を設計 |
-| `/plan-assist` | 実装計画を対話で整理 |
 
 **実装**
 
@@ -68,7 +66,7 @@ CORE.md（Why）→ SPEC.md（How）→ ARCHITECTURE.md（What）
 ## 開発フロー
 
 ```
-/draft-core → /draft-spec → /draft-arch → /plan-assist
+/draft-core → /draft-arch
     ↓
   .tpi（並列実装）→ .cc（静的検証）→ .vc（動作確認）→ /deploy
     ↓

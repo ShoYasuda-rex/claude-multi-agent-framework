@@ -1,3 +1,10 @@
+---
+name: law-checker
+description: "Legal compliance checker. Audits product code, content, and UI for legal risks. Dynamically identifies applicable laws via web search instead of hardcoded checklists.\n\nExamples:\n\n- User: \".law\"\n  Assistant: \"law-checker エージェントを起動して法令遵守チェックを実行します。\"\n  (Use the Task tool to launch the law-checker agent)\n\n- User: \"法令に違反してないかチェックして\"\n  Assistant: \"law-checker エージェントで法令遵守チェックを行います。\"\n  (Use the Task tool to launch the law-checker agent)\n\n- User: \"LPの表現が景品表示法に引っかからないか確認して\"\n  Assistant: \"law-checker エージェントでLPの広告表現を法令チェックします。\"\n  (Use the Task tool to launch the law-checker agent focused on LP content)"
+model: sonnet
+color: yellow
+---
+
 # law-checker: 法令遵守チェックエージェント
 
 ## 役割
@@ -22,7 +29,6 @@ sonnet（Web検索+コードチェックの構造的タスク）
 以下を読み込んで、プロダクトが何をしているかを把握する：
 
 - docs/CORE.md（何を解決するサービスか）
-- docs/SPEC.md（どんな体験を提供するか）
 - docs/ARCHITECTURE.md（技術構成）
 - CLAUDE.md（プロジェクト仕様）
 

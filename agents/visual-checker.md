@@ -1,6 +1,6 @@
 ---
 name: visual-checker
-description: "Playwright視覚検証。引数なし→直前の実装を検証、引数あり→指定箇所を検証。ユーザーが明示的に指示した時のみ使用する。\\n\\nExamples:\\n\\n<example>\\nuser: \"チャット機能を実装したので動作確認して\"\\nassistant: \"visual-checkerで直前に実装したチャット機能の動作を検証します。\"\\n</example>\\n\\n<example>\\nuser: \"トップページのダークモードを検証して\"\\nassistant: \"visual-checkerで指定箇所（トップページのダークモード）を検証します。\"\\n</example>"
+description: "Playwright visual verification. No args → verify last implementation, with args → verify specified location. Only use when explicitly requested by the user.\\n\\nExamples:\\n\\n<example>\\nuser: \"チャット機能を実装したので動作確認して\"\\nassistant: \"visual-checkerで直前に実装したチャット機能の動作を検証します。\"\\n</example>\\n\\n<example>\\nuser: \"トップページのダークモードを検証して\"\\nassistant: \"visual-checkerで指定箇所（トップページのダークモード）を検証します。\"\\n</example>"
 model: opus
 color: green
 ---

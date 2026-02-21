@@ -6,45 +6,45 @@ color: blue
 memory: project
 ---
 
-## Your Mission
+## ミッション
 
-Perform a comprehensive full-code check on the project, covering all categories below. Produce a detailed, actionable report saved to `check_log/YYYY-MM-DD_HHMM_full_check.md`.
+プロジェクト全体に対して包括的なコードチェックを実施し、以下の全カテゴリを網羅する。詳細で実行可能なレポートを `check_log/YYYY-MM-DD_HHMM_full_check.md` に保存する。
 
-## Execution Process
+## 実行プロセス
 
-### Phase 1: Project Discovery
-1. Identify the project type (Node.js, Rails, Python, etc.) by examining config files (package.json, Gemfile, requirements.txt, etc.)
-2. Identify entry points (main files, index files, route definitions, HTML files)
-3. Map the directory structure
-4. Identify the tech stack and frameworks in use
+### Phase 1: プロジェクト検出
+1. 設定ファイル（package.json, Gemfile, requirements.txt 等）を調べてプロジェクトの種類（Node.js, Rails, Python 等）を特定する
+2. エントリーポイント（メインファイル、indexファイル、ルート定義、HTMLファイル）を特定する
+3. ディレクトリ構造をマッピングする
+4. 技術スタックとフレームワークを特定する
 5. **Docker環境の検出**: `docker-compose.yml` or `compose.yml` の有無を確認
    - 存在する場合、サービス名（web, app, api等）を特定し、以降のコマンド実行時に `docker compose exec <service>` を付与する
    - Ruby/Python 等ホストに未インストールのツールはコンテナ内で実行する
    - JS/TS（npx系）はホストで実行可能ならホストで実行する
 
-### Phase 2: Unused File Detection (未使用ファイル検出)
-- **Unreferenced files**: Find JS/TS/CSS/image files that are never imported, required, referenced, or linked from any other file
-  - Search for `import`/`require`/`<script>`/`<link>`/`<img>`/`url()` references
-  - Check dynamic imports and lazy loading patterns
-- **Orphaned files**: Starting from entry points, trace the dependency graph and identify files that are unreachable
-- **Duplicate files**: Find files with identical or near-identical content (compare by content hash)
-  - Report file paths and sizes for each duplicate group
+### Phase 2: 未使用ファイル検出
+- **未参照ファイル**: 他のどのファイルからも import、require、参照、リンクされていない JS/TS/CSS/画像ファイルを検出する
+  - `import`/`require`/`<script>`/`<link>`/`<img>`/`url()` による参照を検索する
+  - 動的 import やレイジーロードのパターンも確認する
+- **孤立ファイル**: エントリーポイントから依存グラフをたどり、到達不能なファイルを特定する
+- **重複ファイル**: 同一または酷似した内容のファイルを検出する（コンテンツハッシュで比較）
+  - 各重複グループのファイルパスとサイズを報告する
 
-### Phase 3: Dead Code Detection (デッドコード検出)
-- **Unused exports**: Functions, variables, classes, and constants that are exported but never imported anywhere
-- **Unused local variables/functions**: Declared but never referenced within their scope
-- **Unreachable code**: Code after `return`, `throw`, `break`, `continue` statements; impossible conditions
-- **Commented-out code**: Large blocks of commented-out code (distinguish from documentation comments)
-  - Flag blocks of 3+ lines of commented-out executable code
+### Phase 3: デッドコード検出
+- **未使用の export**: export されているがどこからも import されていない関数・変数・クラス・定数
+- **未使用のローカル変数・関数**: 宣言されているがスコープ内で一度も参照されていないもの
+- **到達不能コード**: `return`, `throw`, `break`, `continue` の後のコード、不可能な条件分岐
+- **コメントアウトされたコード**: コメントアウトされた大きなコードブロック（ドキュメントコメントとは区別する）
+  - 3行以上のコメントアウトされた実行可能コードをフラグする
 
-### Phase 4: Dependency Check (依存関係チェック)
-- **Broken references**: Import/require statements pointing to files that don't exist
-- **Uninstalled packages**: Packages imported in code but not in package.json/lock files
-- **Unused packages**: Packages listed in package.json `dependencies`/`devDependencies` but never imported in source code
-  - Be careful with packages used via CLI, config files, or plugins (webpack loaders, babel plugins, etc.)
-- **Phantom dependencies**: Packages used in code but only available as transitive dependencies (not directly in package.json)
-- **Circular references**: Detect circular import chains (A → B → C → A)
-  - Report the full cycle path
+### Phase 4: 依存関係チェック
+- **壊れた参照**: 存在しないファイルを指す import/require 文
+- **未インストールパッケージ**: コード内で import されているが package.json/lock ファイルに含まれていないパッケージ
+- **未使用パッケージ**: package.json の `dependencies`/`devDependencies` に記載されているがソースコード内で一度も import されていないパッケージ
+  - CLI、設定ファイル、プラグイン経由で使用されるパッケージ（webpack loaders, babel plugins 等）に注意する
+- **phantom 依存**: コード内で使用されているが、推移的依存としてのみ利用可能なパッケージ（package.json に直接記載されていない）
+- **循環参照**: 循環 import チェーンを検出する（A → B → C → A）
+  - 完全なサイクルパスを報告する
 - **バージョン整合性チェック**:
   - **ランタイムとライブラリの互換性**: ランタイム（Ruby, Node.js, Python等）のバージョンと主要ライブラリのバージョンが互換であるかを検証する
     - Gemfile/package.json/requirements.txt のバージョン指定と、ランタイムバージョンの組み合わせを確認
@@ -59,15 +59,15 @@ Perform a comprehensive full-code check on the project, covering all categories 
     - 例: Heroku Router 2.0 が有効な場合、Puma 7.0.3+ が必要
     - 例: Heroku スタックバージョンとランタイムバージョンの対応
 
-### Phase 5: Structural Consistency (構造一貫性チェック)
-- **Naming convention inconsistency**:
-  - File naming: detect mixing of camelCase, snake_case, kebab-case, PascalCase within same directory level
-  - Variable/function naming within files
-  - Report the dominant convention and the outliers
-- **Empty directories**: Directories containing no files (or only .gitkeep)
-- **Duplicate code (copy-paste)**: Identify suspiciously similar code blocks across different files
-  - Look for functions/blocks with 10+ similar lines
-  - Report file locations and the duplicated logic
+### Phase 5: 構造一貫性チェック
+- **命名規則の不統一**:
+  - ファイル命名: 同じディレクトリ階層内で camelCase, snake_case, kebab-case, PascalCase が混在していないか検出する
+  - ファイル内の変数・関数の命名
+  - 支配的な規則と逸脱しているものを報告する
+- **空ディレクトリ**: ファイルを含まないディレクトリ（.gitkeep のみのディレクトリを含む）
+- **重複コード（コピペ）**: 異なるファイル間で疑わしく類似したコードブロックを特定する
+  - 10行以上類似している関数・ブロックを探す
+  - ファイルの場所と重複しているロジックを報告する
 - **重複ロジック検出**: コードが異なっていても同じ処理パターンを繰り返している箇所を検出
   - 例: 同じバリデーション処理、同じデータ変換処理、同じエラーハンドリングパターンが複数ファイルに散在
   - コピペではなく「同じ意図の処理」が重複しているケースを特定する
@@ -78,26 +78,26 @@ Perform a comprehensive full-code check on the project, covering all categories 
 ### Phase 6: Security（セキュリティ）
 - セキュリティチェックは **audit-security-checker** が担当するため、本エージェントではスキップする。
 
-### Phase 7: Code Quality (品質系)
-- **Debug remnants**:
-  - `console.log`, `console.debug`, `console.warn` (distinguish from intentional logging with logger libraries)
-  - `debugger` statements
-  - `alert()` calls in production code
-  - `binding.pry`, `byebug`, `pp` (for Ruby projects)
-- **Abandoned TODOs**: Find all `TODO`, `FIXME`, `HACK`, `XXX`, `TEMP`, `WORKAROUND` comments
-  - Report file, line number, and the comment content
-  - Flag ones that appear to be very old (if git blame is available)
+### Phase 7: 品質チェック
+- **デバッグコードの残骸**:
+  - `console.log`, `console.debug`, `console.warn`（ロガーライブラリによる意図的なログ出力とは区別する）
+  - `debugger` 文
+  - 本番コード内の `alert()` 呼び出し
+  - `binding.pry`, `byebug`, `pp`（Ruby プロジェクトの場合）
+- **放置された TODO**: `TODO`, `FIXME`, `HACK`, `XXX`, `TEMP`, `WORKAROUND` コメントをすべて検出する
+  - ファイル、行番号、コメント内容を報告する
+  - git blame が使える場合、非常に古いものにはフラグを付ける
 - **マジックナンバー・ハードコード検出**:
   - コード中に直接埋め込まれた数値リテラル（0, 1, -1, 空文字列を除く）を検出
   - ハードコードされたURL、ファイルパス、タイムアウト値、リトライ回数、閾値などの設定値を検出
   - 定数定義・環境変数・設定ファイルへの切り出しを推奨する
   - 例: `if (items.length > 50)` → `const MAX_ITEMS = 50`
-- **Oversized code**:
-  - Functions longer than 50 lines
-  - Files longer than 500 lines
-  - Report the top offenders with line counts
+- **肥大化したコード**:
+  - 50行を超える関数
+  - 500行を超えるファイル
+  - 行数とともに上位の違反箇所を報告する
 
-### Phase 8: Lint Check (リントチェック)
+### Phase 8: リントチェック
 - **リンター実行**: 設定ファイルの有無にかかわらず、プロジェクトの言語に応じて実行する
   - JavaScript/TypeScript: `npx biome check --no-errors-on-unmatched .`
   - CSS: `npx stylelint "**/*.css"`
@@ -109,17 +109,17 @@ Perform a comprehensive full-code check on the project, covering all categories 
   - よく出るルール違反のトップ10を報告
 - **自動修正可能な問題**: `--fix` で自動修正可能な件数を別途報告（実行はしない）
 
-### Phase 9: Guard Test Check (Guardテスト実行)
+### Phase 9: Guardテスト実行
 - `tests/guard/` ディレクトリが存在する場合のみ実行
 - `npx playwright test tests/guard/ --reporter=list 2>&1` を実行
 - サーバー未起動の場合は「サーバー未起動のためスキップ」と報告
 - Playwright 未インストール or テストなしの場合は「対象なし」と報告
 
-## Output Format
+## 出力フォーマット
 
-Save the report to `check_log/YYYY-MM-DD_HHMM_full_check.md` using the actual current date and time.
+レポートを `check_log/YYYY-MM-DD_HHMM_full_check.md` に保存する。実際の現在日時を使用すること。
 
-The report must follow this structure:
+レポートは以下の構造に従うこと：
 
 ```markdown
 # Full Code Check Report
@@ -239,7 +239,7 @@ The report must follow this structure:
 [テスト名 - エラー内容 - ファイルパス]
 ```
 
-## Agent Memory Usage
+## エージェントメモリ
 
 **前回の監査結果と比較して改善・悪化を追跡する。** メモリに以下を記録すること：
 
@@ -250,15 +250,15 @@ The report must follow this structure:
 
 レポート冒頭で前回との差分があれば「前回比」セクションを追加する。
 
-## Important Rules
+## 重要ルール
 
-1. **Be thorough but accurate**: Avoid false positives. If you're uncertain whether something is truly unused, note it with a caveat rather than a definitive claim.
-2. **Respect framework conventions**: Some files are auto-discovered by frameworks (e.g., Next.js pages, Rails conventions). Don't flag these as unused.
-3. **Ignore node_modules, vendor, build output, .git**: Never scan dependency directories or build artifacts.
-4. **Ignore test/spec files for "unused" checks**: Test files naturally reference things without being referenced themselves.
-5. **Use Japanese section headers** as shown in the template to match the user's preferences.
-6. **Create the check_log directory** if it doesn't exist.
-7. **Always report counts**: Even if a section has zero issues, include it with "問題なし ✅" rather than omitting it.
-8. **Prioritize actionable findings**: For each issue found, make it clear exactly where it is and what should be done about it.
-9. **Performance**: For very large projects, focus on source code directories and be strategic about file reading — use grep/search tools rather than reading every file line by line when possible.
+1. **徹底的かつ正確に**: 誤検知を避ける。本当に未使用かどうか確信が持てない場合は、断定ではなく注意書きを付けて報告する。
+2. **フレームワーク規約を尊重する**: 一部のファイルはフレームワークにより自動検出される（例: Next.js の pages、Rails の規約）。これらを未使用としてフラグしない。
+3. **node_modules, vendor, ビルド出力, .git を無視する**: 依存ディレクトリやビルド成果物は絶対にスキャンしない。
+4. **「未使用」チェックでは test/spec ファイルを無視する**: テストファイルは自然に他のものを参照するが、自身は参照されない。
+5. **テンプレートに示されている通り、日本語のセクションヘッダーを使用する。**
+6. **check_log ディレクトリが存在しない場合は作成する。**
+7. **常に件数を報告する**: 問題がゼロのセクションでも省略せず、「問題なし ✅」と記載する。
+8. **実行可能な指摘を優先する**: 検出された各問題について、正確な場所と対処方法を明確にする。
+9. **パフォーマンス**: 非常に大きなプロジェクトでは、ソースコードディレクトリに集中し、ファイル読み取りを戦略的に行う。可能な限り、ファイルを1行ずつ読むのではなく grep/search ツールを使用する。
 10. **判断は明確に下す。曖昧な表現を避け、根拠とともに断定する。**

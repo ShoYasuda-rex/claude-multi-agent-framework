@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: "テスト実行エージェント。プロジェクトのテストスイートを検出・実行し、結果を分析・報告する"
+description: "Test execution agent. Detects and runs the project's test suite, then analyzes and reports results"
 model: sonnet
 color: yellow
 ---
