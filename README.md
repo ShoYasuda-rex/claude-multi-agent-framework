@@ -44,8 +44,6 @@ CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
 |---------|------|
 | `.cc` | 静的検証（リント・型チェック・ビルド確認） |
 | `.vc` | ブラウザで動作確認（Playwright） |
-| `.spc` | 仕様との整合性チェック |
-
 **監査**
 
 | コマンド | 役割 |
@@ -60,7 +58,7 @@ CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
 | コマンド | 役割 |
 |---------|------|
 | `/deploy` | add → commit → push |
-| `/guide` | 今やるべきことを案内 |
+| `/solo-trainer` | 自走で開発を回す練習 |
 | `/research-team` | 3視点調査（実装モード付き） |
 
 ## 開発フロー
@@ -73,7 +71,7 @@ CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
   .cod / .sec（監査） → 改善 → 繰り返し
 ```
 
-迷ったら `/guide` と打てば、プロジェクトの状態を見て次にやることを教えてくれる。
+迷ったら `/solo-trainer` と打てば、プロジェクトの状態を見て次にやることを教えてくれる。
 
 ## 必要なもの
 
