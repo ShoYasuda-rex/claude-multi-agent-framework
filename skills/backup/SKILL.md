@@ -14,6 +14,11 @@ disable-model-invocation: true
 
 ## 手順
 
+### 0. CLAUDE.md 初期生成チェック
+
+- プロジェクトルートに `CLAUDE.md` が存在しない場合、`/init` スキルを実行して生成する
+- 既に存在する場合はスキップし、ステップ1に進む
+
 ### 1. CLAUDE.md 更新チェック
 
 - プロジェクトの `CLAUDE.md` を確認

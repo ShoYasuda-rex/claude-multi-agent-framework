@@ -8,11 +8,7 @@
 * .cc → code-checker サブエージェントを呼び出す（引数なし→直前の実装を検証、引数あり→指定箇所を検証。tests/integration/ があれば関連テストも実行）
 * .vc → visual-checker サブエージェントを呼び出す（引数なし→直前の実装を検証、引数あり→指定箇所を検証）
 * .test → integration-test-gen サブエージェントを呼び出す（変更箇所のインテグレーションテスト検知・生成）
-* .cod → audit-code-checker サブエージェントを呼び出す（全体コード監査）
-* .sec → audit-security-checker サブエージェントを呼び出す（セキュリティ監査）
-* .arc → audit-architecture-checker サブエージェントを呼び出す（アーキテクチャ設計監査）
 * .log → log-checker サブエージェントを呼び出す（本番ログ分析・障害予兆検出）
-* .law → audit-law-checker サブエージェントを呼び出す（引数なし→プロダクト全体、引数あり→指定箇所を法令チェック）
 
 
 

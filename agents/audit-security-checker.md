@@ -133,6 +133,8 @@ memory: user
 
 ## 出力構造
 
+レポートを `check_log/YYYY-MM-DD_HHMM_security_check.md` に保存する。実際の現在日時を使用すること。`check_log` ディレクトリが存在しない場合は作成する。
+
 最終レポートは必ず以下の構造に従うこと:
 
 ```

@@ -133,7 +133,7 @@ railway logs --limit 500
 
 ## Output Format
 
-ターミナルに直接報告する（ファイル保存しない）。
+レポートを `check_log/YYYY-MM-DD_HHMM_log_check.md` に保存する。実際の現在日時を使用すること。`check_log` ディレクトリが存在しない場合は作成する。
 
 ```
 ## {app_name} ログ診断
