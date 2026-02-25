@@ -1,17 +1,17 @@
 ---
 name: infra-setup
-description: 本番インフラの初期セットアップ & 検証（DB・監視・エラー通知・ブランチ戦略）
-tools: Read, Glob, Bash, Write, Edit, AskUserQuestion
+description: 本番インフラの初期セットアップ（モード判定・Git初期化・GitHub作成・プラットフォーム作成）& 全項目検証
+tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Task
 user_invocable: true
-model: haiku
+model: opus
 ---
 
-# infra-setup（本番インフラ セットアップ & 検証）
+# infra-setup（モード判定 + Part 0 + 検証）
 
 本番運用の基盤をセットアップし、準備状況を検証する。
 
-- **初回（セットアップモード）**: ARCHITECTURE.md を読み、運用基盤を実際にセットアップする
-- **2回目以降（検証モード）**: セットアップ済みの項目が正しく動いているか検証する
+- **初回（セットアップモード）**: ARCHITECTURE.md を読み、Part 0（リポジトリ & プラットフォーム）をセットアップ → 次のスキルを案内
+- **2回目以降（検証モード）**: セットアップ済みの全項目が正しく動いているか検証する
 
 ---
 
@@ -32,167 +32,150 @@ model: haiku
 - 技術スタック（言語・FW・ホスティング先）
 - エラーハンドリング・監視（エラー通知ツール・ログ方針）
 - 認証・権限設計
+- API設計（外部サービス依存）
 
-ARCHITECTURE.md がなければ「先に /draft-arch で設計を固めよう」と伝えて終了する。
+ARCHITECTURE.md がなければ「先に /draft で設計を固めよう」と伝えて終了する。
 
-### Step 1: DBバックアップ
+---
 
-AskUserQuestion で質問:
+### 【Part 0: リポジトリ & プラットフォーム】
 
-> 本番DBの自動バックアップは設定済みですか？
+以下を順に確認し、未セットアップなら実行する。既に完了している項目はスキップ。
 
-選択肢: 設定済み / まだ / DBを使っていない
+### Step 0.1: Git初期化
 
-**「まだ」の場合:**
+`.git` ディレクトリの存在を確認する。
 
-ARCHITECTURE.md の技術スタックからDB種別とホスティング先を特定し、該当する手順を案内する：
+- **存在する** → スキップ
+- **存在しない** → `git init` を実行
 
-- **Heroku Postgres**: `heroku pg:backups:schedule DATABASE_URL --at '04:00 Asia/Tokyo'` を案内
-- **Railway**: 自動バックアップの有効化手順を案内
-- **AWS RDS**: コンソールから自動バックアップ有効化の手順を案内
-- **自前PostgreSQL**: `pg_dump` のcron設定例を提示
-- **自前MySQL**: `mysqldump` のcron設定例を提示
-- **SQLite**: ファイルコピーのcron設定例を提示
-- **その他**: 一般的なバックアップ戦略を案内
+### Step 0.2: GitHubリポジトリ作成
 
-案内後:
-> 復元テスト（バックアップから実際に復元できるか）はやりましたか？
+`git remote -v` を**実行して**リモートの有無を確認する。
 
-### Step 2: ブランチ戦略
+- **リモートが存在する** → スキップ
+- **リモートが存在しない** → 以下を実行:
+  1. `.gitignore` を確認・補完（機密ファイル・依存関係・ビルド成果物・OS/エディタファイル）
+  2. `gh repo create {プロジェクト名} --private --source=. --remote=origin` を実行
+     - `gh` CLI が使えない場合はユーザーに手動作成を依頼
+  3. 初期コミット: 現在のファイルを個別に `git add` & commit
+  4. 初期プッシュ: `git push -u origin master`
 
-`git branch -a` で現在のブランチ構成を確認する。
+### Step 0.3: デプロイプラットフォーム作成
 
-mainブランチ（またはmaster）のみの場合、AskUserQuestion で質問:
+ARCHITECTURE.md の技術スタック（ホスティング先）に応じて、プラットフォームの存在を確認し、なければ作成する。
 
-> 本番ブランチ（main）に直接プッシュしています。開発用ブランチを分けますか？
+| ホスティング先 | 存在確認 | 作成コマンド |
+|--------------|----------|------------|
+| Cloudflare Pages | `npx wrangler pages project list` で確認 | `npx wrangler pages project create {プロジェクト名}` → GitHub連携 |
+| Heroku | `heroku apps:info` で確認 | `heroku create {プロジェクト名}` → `git remote add heroku ...` |
+| Railway | `railway status` で確認 | `railway init` → GitHub連携 |
+| Vercel | `vercel ls` で確認 | `vercel` → GitHub連携 |
+| その他 | ARCHITECTURE.md の指定に従う | ユーザーに確認しながら実行 |
 
-選択肢: 分ける / このままでいい
+各ステップで失敗したら修正を試み、ダメならユーザーに報告して判断を仰ぐ。
 
-**「分ける」の場合:**
-- `git checkout -b develop` を実行
-- CLAUDE.md に `default-branch: develop` を記録
-- 「今後は develop で開発し、本番反映時に main にマージする」と案内
+---
 
-**「このままでいい」の場合:**
-- リスクを伝えた上でスキップ
+### Part 0 完了: CLAUDE.md に記録
 
-### Step 3: エラーハンドリング・監視のセットアップ
-
-ARCHITECTURE.md の「エラーハンドリング・監視」セクションを参照し、以下を順に実施する。
-
-#### 3a. グローバルエラーハンドラ
-
-プロジェクトのコードを Glob/Read で確認し、グローバルエラーハンドラが存在するか調べる。
-
-**存在しない場合:**
-ARCHITECTURE.md の方針と技術スタックに基づいて、グローバルエラーハンドラを生成する。
-
-例:
-- **Express**: `app.use((err, req, res, next) => { ... })` ミドルウェア
-- **Rails**: `rescue_from` in ApplicationController
-- **Next.js**: `pages/_error.js` or `app/error.tsx`
-
-ユーザーに確認後、実装する。
-
-#### 3b. エラー通知（Sentry等）
-
-ARCHITECTURE.md で指定されたエラー通知ツールを確認する。
-
-**Sentry の場合:**
-1. SDKパッケージをインストール（`npm install @sentry/node` 等）
-2. 初期化コードを生成してエントリポイントに追加
-3. DSNの設定箇所を用意（環境変数 `SENTRY_DSN`）
-4. 「Sentry のプロジェクトを作成して DSN を取得し、環境変数に設定してください」と案内
-5. テスト送信コマンドを案内
-
-**その他のツールの場合:**
-ARCHITECTURE.md の指定に従い、同様にセットアップを支援する。
-
-#### 3c. ヘルスチェックエンドポイント
-
-プロジェクトに `/health` エンドポイントが存在するか確認する。
-
-**存在しない場合:**
-技術スタックに応じたヘルスチェックエンドポイントを生成する（DB接続確認を含む）。
-
-#### 3d. 死活監視
-
-AskUserQuestion で質問:
-
-> 死活監視は設定済みですか？
-
-選択肢: 設定済み / まだ / 本番公開していない
-
-**「まだ」の場合:**
-- UptimeRobot（無料、5分間隔）: https://uptimerobot.com でURLを登録する手順を案内
-
-### Step 4: 完了
-
-全項目の確認後、CLAUDE.md に以下を追記する:
+CLAUDE.md に以下を追記する:
 
 ```markdown
 # 運用設定
-infra-setup: done
+infra-setup-progress: part0
 infra-setup-items:
-  db-backup: {設定済み|スキップ|不要}
-  branch-strategy: {設定済み|スキップ}
-  error-handler: {設定済み|スキップ}
-  error-notification: {設定済み|スキップ}
-  health-check: {設定済み|スキップ}
-  uptime-monitor: {設定済み|スキップ|後で}
+  # Part 0: リポジトリ & プラットフォーム
+  git-repo: {設定済み|既存}
+  github-remote: {設定済み|既存}
+  deploy-platform: {設定済み|既存|不要}
 ```
 
-結果サマリーを報告する。例:
+ユーザーに以下を案内する:
 
-```
-運用セットアップ完了:
-✅ DBバックアップ: Heroku自動バックアップ設定済み
-✅ ブランチ戦略: develop分離済み
-✅ エラーハンドラ: Express globalエラーミドルウェア追加
-✅ エラー通知: Sentry SDK導入済み（DSN設定待ち）
-✅ ヘルスチェック: /health エンドポイント追加
-⚠️ 死活監視: 後で設定予定
-```
+> Part 0（リポジトリ & プラットフォーム）が完了しました。
+> 次は `/infra-setup-guard` を実行してください（守りのインフラ: DBバックアップ・ブランチ戦略・エラー監視）。
 
 ---
 
 ## 検証モード
 
-`infra-setup: done` がある場合に実行。CLAUDE.md の `infra-setup-items` を読み、各項目を検証する。
+`infra-setup: done` がある場合に実行。CLAUDE.md の `infra-setup-items` を読み、各項目を**コマンド実行で**検証する。
+
+独立したチェックは Task で並列実行する:
+- Part 0（Git・GitHub・プラットフォーム） + Part A（DB・ブランチ・エラー） + Part B（デプロイ・環境変数・外部サービス）
 
 ### 検証内容
 
 | 項目 | 検証方法 |
 |------|----------|
+| **Part 0: リポジトリ & プラットフォーム** | |
+| Gitリポジトリ | `.git` 存在確認 |
+| GitHubリモート | `git remote -v` で確認 |
+| デプロイプラットフォーム | ホスティング先CLIで存在・接続確認 |
+| **Part A: 守りのインフラ** | |
+| DBバックアップ | `heroku pg:backups:schedules` 等を実行して確認 |
+| ブランチ戦略 | `git branch -a` を実行して確認 |
 | エラーハンドラ | Glob/Read でコードが存在するか確認 |
-| エラー通知 | Sentry SDK がインストールされているか、初期化コードがあるか確認 |
-| ヘルスチェック | `/health` エンドポイントのコードが存在するか確認 |
-| ブランチ戦略 | `git branch -a` で確認 |
-| DBバックアップ | ユーザーに現状を確認 |
+| エラー通知 | Gemfile/package.json でSDKの存在 + 初期化コード確認 |
+| ヘルスチェック | コード確認 + `curl` で本番エンドポイントを実行確認 |
 | 死活監視 | ユーザーに現状を確認 |
+| **Part B: 本番接続** | |
+| デプロイ設定 | Procfile/Dockerfile 等の存在を Glob で確認 |
+| 環境変数 | コードから再収集 → `heroku config` 等を実行して過不足照合 |
+| 外部サービス | 環境変数の存在をホスティング先の config で自動判定 |
+| ドメイン・SSL | `heroku domains` 等を実行して確認 |
+| 本番DB | `heroku run rails db:migrate:status` 等を実行して確認 |
+| スモークテスト | `curl` で本番URL応答を実行確認 |
 
-### 検証結果
+### 検証結果の表示形式
 
 ```
 運用チェック:
-✅ エラーハンドラ: 存在確認OK
-✅ Sentry: SDK + 初期化コード確認OK
-❌ ヘルスチェック: /health が見つからない → 再作成を提案
+
+【Part 0: リポジトリ & プラットフォーム】
+✅ Gitリポジトリ: .git 確認OK
+✅ GitHubリモート: origin → github.com/...
+✅ デプロイプラットフォーム: Heroku app 確認OK
+
+【Part A: 守りのインフラ】
+✅ DBバックアップ: スケジュール確認OK（毎日04:00 JST）
 ✅ ブランチ: develop ブランチあり
-✅ DBバックアップ: 設定済み（ユーザー確認）
-⚠️ 死活監視: 未設定 → UptimeRobot を案内
+✅ エラーハンドラ: rescue_from 確認OK
+✅ エラー通知: sentry-rails gem + 初期化コード確認OK
+✅ ヘルスチェック: /up → 200 OK
+⚠️ 死活監視: 未設定
+
+【Part B: 本番接続】
+✅ デプロイ設定: Procfile 確認OK
+⚠️ 環境変数: DEEPL_API_KEY がコードに追加されたが本番に未設定
+✅ 外部サービス: Twilio/DeepL の環境変数確認OK
+✅ ドメイン・SSL: example.herokuapp.com
+✅ 本番DB: 未実行マイグレーションなし
+✅ スモークテスト: 全エンドポイント応答OK
 ```
 
 「スキップ」だった項目は「前回スキップしました。今回設定しますか？」と再提案する。
-「❌」の項目はセットアップモードと同じ手順で修復を支援する。
+「❌」の項目はセットアップモードと同じ手順で修復を実行する。
+「⚠️」の項目は差分や変更点を具体的に示し、修正コマンドを提示・実行する。
 
 ---
 
 ## ルール
 
 - ARCHITECTURE.md を必ず読み、プロジェクトの方針に合わせてセットアップする
-- 案内は具体的に（コマンド例やURL付き）
-- セットアップモードではコードの生成・編集を行う（エラーハンドラ、Sentry初期化、ヘルスチェック等）
-- 実装前にユーザーに確認を取る（何を生成するか提示してから実行）
-- 「後でやる」はフラグを `後で` として記録（検証モードで再提案される）
+- **確認・診断系コマンドは即実行する**（案内ではなく実行結果を見せる）
+- **変更・設定系コマンドはユーザー確認後に実行する**（案内だけで終わらせない）
+- AskUserQuestion は判断が必要な分岐点でのみ使う
+- 外部サービスのAPIキー・シークレットは絶対にコードにハードコードしない（環境変数を案内する）
+- 本番への破壊的操作（DB変更、force push等）は必ずユーザー確認を取る
+- 「後でやる」は `後で` として記録（検証モードで再提案される）
 - 「不要」「このままでいい」は `スキップ` として記録
+
+### UI操作の案内ルール
+
+CLIで完結しない操作は、**ステップ番号付きの具体的な手順**で案内する:
+- 各ステップは1アクション（クリック or 入力）
+- ボタン名・メニュー名は画面の表記そのままを使う
+- 入力値が決まっているものはバッククォートで具体的に提示
+- 手順の最後に「次のアクション」を明示する

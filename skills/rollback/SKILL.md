@@ -3,7 +3,6 @@ name: rollback
 description: gitローカルコミットから復元
 model: haiku
 user_invocable: true
-disable-model-invocation: true
 ---
 
 # Restore（バックアップからの復元）

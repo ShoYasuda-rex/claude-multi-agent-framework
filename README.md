@@ -29,8 +29,7 @@ CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
 
 | コマンド | 役割 |
 |---------|------|
-| `/draft-core` | プロダクトの本質を整理 |
-| `/draft-arch` | 技術構成を設計 |
+| `/draft` | プロダクトの本質整理 + 技術構成設計 |
 
 **実装**
 
@@ -64,7 +63,7 @@ CORE.md（Why + 体験方針）→ ARCHITECTURE.md（What/How）
 ## 開発フロー
 
 ```
-/draft-core → /draft-arch
+/draft
     ↓
   .tpi（並列実装）→ .cc（静的検証）→ .vc（動作確認）→ /deploy
     ↓

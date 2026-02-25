@@ -2,7 +2,7 @@
 name: local
 description: ローカル開発サーバーを起動してブラウザで開く
 model: haiku
-tools: Bash, Read, Glob
+tools: Bash, Read, Glob, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_click
 user_invocable: true
 ---
 
@@ -68,10 +68,18 @@ user_invocable: true
 
 ### 5. ブラウザで開く
 
-- 検出したポートで `http://localhost:{port}` をブラウザで開く
-  - Windows: `start http://localhost:{port}`
-  - Mac: `open http://localhost:{port}`
+- `browser_navigate` で `http://localhost:{port}` を開く
+- ナビゲーション失敗（`net::ERR_EMPTY_RESPONSE` 等）の場合 → 3秒待って1回だけリトライ
 
-### 6. 完了報告
+### 6. 自動ログイン（ログイン画面の場合）
+
+- `browser_snapshot` でページの状態を確認する
+- **ログインフォームが表示されている場合**（メールアドレス/パスワードの入力欄がある）:
+  1. CLAUDE.md の「開発コマンド」セクションからテスト用認証情報を探す（例: `admin@example.com / password`、`db:seed` のコメント等）
+  2. 認証情報が見つかった場合 → `browser_fill_form` でメールアドレスとパスワードを入力し、`browser_click` でログインボタンをクリック
+  3. 認証情報が見つからない場合 → 「ログインフォームが表示されています。認証情報を入力してください。」と報告して終了
+- **ログインフォームでない場合** → そのままステップ7へ
+
+### 7. 完了報告
 
 - 「サーバー起動しました: http://localhost:{port}」と1行表示して終了

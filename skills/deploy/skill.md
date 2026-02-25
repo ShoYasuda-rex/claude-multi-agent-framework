@@ -73,20 +73,7 @@ ARCHITECTURE.md も存在しない場合、AskUserQuestion で以下を聞く:
 `git remote` を実行し、CLAUDE.md で指定されたリモート（例: `origin`）が存在するか確認する。
 
 - **リモートが存在する** → ステップ 2 へ進む
-- **リモートが存在しない** → AskUserQuestion でリポジトリパスを聞く:
-
-**質問A: プロトコル**
-- `SSH（git@github.com:）`（Recommended）
-- `HTTPS（https://github.com/）`
-
-**質問B: GitHubリポジトリ（user/repo 形式）**
-- Other で直接入力（例: `user/my-project`）
-
-選択に応じて URL を組み立てる:
-- SSH → `git remote add {remote} git@github.com:{user/repo}.git`
-- HTTPS → `git remote add {remote} https://github.com/{user/repo}.git`
-
-実行後、CLAUDE.md の「Git 運用」セクションにリポジトリ情報を追記する。
+- **リモートが存在しない** → 「`/infra-setup` を先に実行してください」と案内して終了
 
 ---
 
@@ -96,101 +83,10 @@ CLAUDE.md の Git 運用セクションに「FTP」「GitHub Actions」「deploy
 
 **含まれていない** → ステップ 3 へスキップ（FTP不要のプロジェクト）
 
-**含まれている（FTPデプロイが必要）** → 以下を順に実行:
+**含まれている（FTPデプロイが必要）** → `.github/workflows/deploy.yml` が存在するか Glob で確認する:
 
-#### 2.1. ワークフローファイルの存在チェック
-
-`.github/workflows/deploy.yml` が既に存在するか Glob で確認する。
-
-- **存在する** → ステップ 3 へスキップ
-- **存在しない** → ステップ 2.2 へ
-
-#### 2.2. FTP接続情報をヒアリング
-
-AskUserQuestion で以下を聞く（1回の呼び出しにまとめる）:
-
-**質問A: FTPサーバーのホスト名**
-- Other で直接入力（例: `example.com`）
-
-**質問B: FTPのアップロード先ディレクトリ**
-- `/public_html`（Recommended）
-- `/httpdocs`
-- `/`
-- Other で直接入力
-
-#### 2.3. ワークフローファイルを自動生成
-
-`.github/workflows/` ディレクトリを作成し、`deploy.yml` を Write で作成する:
-
-```yaml
-name: Deploy to FTP
-
-on:
-  push:
-    branches:
-      - {ブランチ名}
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            .claude/**
-            docs/**
-            composer.json
-            composer.lock
-            CLAUDE.md
-            README.md
-```
-
-#### 2.4. CLAUDE.md にデプロイ情報を追記
-
-Git 運用セクションに以下を追加:
-
-```markdown
-- デプロイ: GitHub Actions → FTP自動デプロイ（`.github/workflows/deploy.yml`）
-- FTP接続情報: GitHub Secrets（`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FTP_SERVER_DIR`）
-```
-
-#### 2.5. GitHub Secrets の登録を案内し、確認を待つ
-
-ワークフローファイルを新規作成した場合、**必ず**以下のメッセージを表示する。
-**ユーザーが Secrets 登録済みと回答するまで push しない。**
-
----
-
-**GitHub Secrets の設定が必要です。** 以下の4つを GitHub リポジトリに登録してください:
-
-1. リポジトリの **Settings → Secrets and variables → Actions** を開く
-2. 「New repository secret」から以下を追加:
-
-| Secret名 | 値 |
-|---|---|
-| `FTP_SERVER` | {ヒアリングで得たホスト名} |
-| `FTP_USERNAME` | FTPユーザー名 |
-| `FTP_PASSWORD` | FTPパスワード |
-| `FTP_SERVER_DIR` | {ヒアリングで得たディレクトリ} |
-
-設定後、`master` への push で自動的にFTPデプロイが実行されます。
-
----
-
-AskUserQuestion で「Secrets を登録しましたか？」と確認する:
-- 「はい、登録した」→ ステップ 3 へ
-- 「まだ」→ 登録を待つ（push しない）
+- **存在する** → ステップ 3 へ
+- **存在しない** → 「`/infra-setup` を先に実行してください（FTPデプロイのワークフロー生成が必要です）」と案内して終了
 
 ---
 

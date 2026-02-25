@@ -3,7 +3,6 @@ name: backup
 description: gitローカルコミット（pushなし）
 model: haiku
 user_invocable: true
-disable-model-invocation: true
 ---
 
 # Backup（ローカルコミット）
@@ -27,7 +26,7 @@ disable-model-invocation: true
 
 ### 2. git 初期化チェック
 
-- `.git` がなければ `git init` を実行
+- `.git` がなければ「`/infra-setup` を先に実行してください」と案内して終了
 
 ### 2.5. dependabot.yml の確認・生成
 
@@ -44,15 +43,9 @@ disable-model-invocation: true
     - `.github/workflows/` → `github-actions`
   - 検出されたエコシステムごとに `updates` エントリを生成（schedule: weekly）
 
-### 3. `.gitignore` の確認・補完
+### 3. `.gitignore` の存在チェック
 
-- プロジェクトを探索し、以下を確認:
-  - 機密ファイル（`.env`, `.dev.vars`, `*_key*`, `credentials.*` など）
-  - 依存関係（`node_modules/`, `vendor/`, `venv/`, `__pycache__/` など）
-  - ビルド成果物（`dist/`, `build/`, `*.min.js` など）
-  - OS/エディタファイル（`.DS_Store`, `Thumbs.db`, `.vscode/`, `.idea/` など）
-  - ログ・一時ファイル（`*.log`, `*.tmp`, `*.bak` など）
-- 不足があれば `.gitignore` に追加
+- `.gitignore` がなければ「`/infra-setup` を先に実行してください」と案内して終了
 
 ### 4. 機密ファイルチェック
 
