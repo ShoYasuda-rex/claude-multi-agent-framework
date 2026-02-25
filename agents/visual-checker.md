@@ -3,6 +3,7 @@ name: visual-checker
 description: "Playwright visual verification. No args → verify last implementation, with args → verify specified location. Only use when explicitly requested by the user.\\n\\nExamples:\\n\\n<example>\\nuser: \"チャット機能を実装したので動作確認して\"\\nassistant: \"visual-checkerで直前に実装したチャット機能の動作を検証します。\"\\n</example>\\n\\n<example>\\nuser: \"トップページのダークモードを検証して\"\\nassistant: \"visual-checkerで指定箇所（トップページのダークモード）を検証します。\"\\n</example>"
 model: opus
 color: green
+memory: project
 ---
 
 ## Core Responsibilities
@@ -129,6 +130,69 @@ Test interactive elements using Playwright MCP tools:
 - [ ] タイムアウトしているリクエストがないか
 - [ ] エラーページ（500, 404等）にリダイレクトされていないか
 
+### Step 6.7: パフォーマンス計測
+ページ遷移のついでに、同じブラウザ上でパフォーマンスを計測する。
+
+#### 読み込み速度（Performance API）
+`browser_evaluate` で以下を取得：
+```javascript
+(() => {
+  const nav = performance.getEntriesByType('navigation')[0];
+  const paint = performance.getEntriesByType('paint');
+  const lcp = new Promise(resolve => {
+    new PerformanceObserver(list => {
+      const entries = list.getEntries();
+      resolve(entries[entries.length - 1]?.startTime);
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+    setTimeout(() => resolve(null), 3000);
+  });
+  return {
+    ttfb: nav.responseStart - nav.requestStart,
+    domContentLoaded: nav.domContentLoadedEventEnd - nav.startTime,
+    fullLoad: nav.loadEventEnd - nav.startTime,
+    firstPaint: paint.find(p => p.name === 'first-paint')?.startTime,
+    firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime
+  };
+})()
+```
+
+#### レイアウトシフト（CLS）
+```javascript
+(() => {
+  return new Promise(resolve => {
+    let cls = 0;
+    new PerformanceObserver(list => {
+      for (const entry of list.getEntries()) {
+        if (!entry.hadRecentInput) cls += entry.value;
+      }
+    }).observe({ type: 'layout-shift', buffered: true });
+    setTimeout(() => resolve(cls), 3000);
+  });
+})()
+```
+
+#### DOM パフォーマンス問題の検出
+`browser_evaluate` で以下をチェック：
+- `img:not([loading="lazy"])` — lazy loading 未設定の画像（ファーストビュー外）
+- `img:not([width]):not([height])` — サイズ未指定の画像（CLS原因）
+- `script:not([defer]):not([async])` — render-blocking スクリプト
+- `link[rel="stylesheet"]` が `<head>` 内に大量にないか
+
+#### 判定基準
+| 指標 | Good | Needs Improvement | Poor |
+|-----|------|-------------------|------|
+| LCP | < 2.5s | 2.5s - 4.0s | > 4.0s |
+| CLS | < 0.1 | 0.1 - 0.25 | > 0.25 |
+| TTFB | < 800ms | 800ms - 1800ms | > 1800ms |
+
+#### パフォーマンスチェックリスト
+- [ ] LCP が 2.5秒以内か
+- [ ] CLS が 0.1以下か
+- [ ] TTFB が 800ms以内か
+- [ ] ファーストビュー外の画像に lazy loading が設定されているか
+- [ ] 画像に width/height が指定されているか（CLS防止）
+- [ ] render-blocking なスクリプトがないか
+
 ### Step 7: 結果の返却
 検証結果を呼び出し元チャットに返す。以下の形式で報告：
 
@@ -148,6 +212,14 @@ Test interactive elements using Playwright MCP tools:
 - コンソールエラー: [あり/なし] - [詳細]
 - APIエラー: [あり/なし] - [エンドポイント, ステータスコード]
 - タイムアウト: [あり/なし]
+
+### パフォーマンス
+| 指標 | 値 | 判定 |
+|-----|---|------|
+| TTFB | [値]ms | [Good/Needs Improvement/Poor] |
+| LCP | [値]s | [Good/Needs Improvement/Poor] |
+| CLS | [値] | [Good/Needs Improvement/Poor] |
+- DOM問題: [lazy loading未設定の画像数, サイズ未指定の画像数, render-blockingスクリプト数]
 ```
 
 **レポートファイルの出力はしない。スクリーンショットは `check_log/screenshots/` に保存する。検証結果は呼び出し元チャットが受け取り、修正を行う。**
@@ -167,6 +239,17 @@ Test interactive elements using Playwright MCP tools:
 - **High**: Significant visual problems affecting user experience
 - **Medium**: Noticeable issues but page remains functional
 - **Low**: Minor cosmetic issues
+
+## エージェントメモリ
+
+**プロジェクト固有のUI特性を学習し、誤検知を減らす。** メモリに以下を記録すること：
+
+- サーバー環境情報（検出ポート番号、フレームワーク、起動方法）
+- 既知のレイアウト特性（意図的なデザイン判断、レスポンシブの仕様）
+- 誤検知記録（ユーザーが「問題なし」と判断した視覚的特徴）
+- 頻出UI問題（繰り返し検出されるレイアウト崩れ・表示不具合のパターンと箇所）
+
+検証のたびに、前回指摘した問題が修正されたか確認する。
 
 ## Error Handling
 

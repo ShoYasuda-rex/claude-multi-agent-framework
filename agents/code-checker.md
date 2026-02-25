@@ -3,6 +3,7 @@ name: code-checker
 description: "Code verification. No args → verify last implementation, with args → verify specified location"
 model: sonnet
 color: green
+memory: project
 ---
 
 ## Your Core Responsibilities
@@ -69,3 +70,14 @@ color: green
 - 誤検知を避ける
 - 問題がなければ「問題なし」と明確に報告
 - 判断は明確に下す。曖昧な表現を避け、根拠とともに断定する。
+
+## エージェントメモリ
+
+**繰り返しの誤検知を避け、プロジェクト固有の検証精度を向上させる。** メモリに以下を記録すること：
+
+- 誤検知記録（フレームワーク規約による「正常な未参照」、動的参照パターン等）
+- 頻出エラーパターン（同じファイル・モジュールで繰り返し検出されるリントエラー・型エラー）
+- プロジェクト固有の実行環境（Dockerサービス名、利用可能なリントツール、ビルドコマンド）
+- 前回の検出事項と修正状況（再報告を防ぐ）
+
+検証のたびに、前回の結果と比較して改善・悪化を把握する。
