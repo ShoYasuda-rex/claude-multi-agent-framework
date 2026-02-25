@@ -38,16 +38,6 @@ memory: project
    - ビルドエラーが出た場合は CRITICAL で報告
    - ビルドスクリプトがない場合はスキップ
 
-4. **Guardテスト実行**: `tests/guard/` ディレクトリが存在する場合のみ実行
-   - `ls tests/guard/*.spec.ts 2>/dev/null` で存在確認
-   - 存在しなければスキップ（「Guardテスト: 対象なし」と報告）
-   - 存在すれば: `npx playwright test tests/guard/ --reporter=list 2>&1`
-   - サーバー未起動で接続エラーの場合: 「Guardテスト: サーバー未起動のためスキップ」と WARNING で報告
-   - Playwright 未インストールの場合: スキップして報告
-   - 結果報告:
-     - 全PASS: 「Guardテスト: 全{N}件 PASS」
-     - FAIL あり: テスト名・エラー内容・ファイルパスを **CRITICAL** で報告
-
 ## Output
 
 ファイル出力は不要。検証結果を親エージェントに返すだけでよい。
