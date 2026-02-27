@@ -41,8 +41,8 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 | 法令チェック | audit-law-checker |
 
 - 全て `run_in_background: true` で並列実行する
-- 各エージェントの prompt は「プロジェクト全体を監査してレポートを出してください」
 - 選択された Task 呼び出しを **1つのメッセージ内で同時に** 発行すること
+- 各エージェントの prompt は「プロジェクト全体を監査してレポートを出してください」
 
 ---
 

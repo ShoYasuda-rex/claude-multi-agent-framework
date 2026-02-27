@@ -2,7 +2,6 @@
 name: kickoff
 description: プロダクトの本質整理 + アーキテクチャ設計 + プロジェクト初期化
 user_invocable: true
-argument-hint: "[プロジェクト名]"
 model: opus
 ---
 
@@ -19,7 +18,7 @@ model: opus
 
 ### Step 0: アプリ名の確定とフォルダ作成
 
-$ARGUMENTS があればアプリ名として使う。なければ AskUserQuestion で聞く:
+AskUserQuestion で聞く:
 
 > アプリの名前は？（英語のケバブケースが理想。例: habit-tracker, recipe-box）
 
@@ -288,7 +287,7 @@ CORE.md、docs/ARCHITECTURE.md を読み込み、要約を提示する：
 
 ### docs/CORE.md
 
-$ARGUMENTS が指定されていればプロジェクト名として使う。
+ヒアリングで確定したプロジェクト名を使う。
 
 ```markdown
 # プロジェクト名
@@ -323,7 +322,7 @@ $ARGUMENTS が指定されていればプロジェクト名として使う。
 
 ### docs/ARCHITECTURE.md
 
-$ARGUMENTS が指定されていればプロジェクト名として使う。
+ヒアリングで確定したプロジェクト名を使う。
 
 ```markdown
 # プロジェクト名 — アーキテクチャ設計

@@ -4,21 +4,73 @@ description: 実装後の品質チェックを一括実行（テスト・静的�
 user_invocable: true
 ---
 
-## 実行フロー
+## 1. 選択
 
-1. ユーザーに実行対象を複数選択で確認する:
-   - テスト（test-checker） — テスト生成＋実行（ユニット・インテグレーション・E2E）
-   - 静的検証（code-checker） — 依存関係・リント・型チェック・ビルド確認
-   - 動的検証（visual-checker） — ブラウザで画面確認
+AskUserQuestion（multiSelect: true）で実行する検証を選ばせる:
 
-   **デフォルト**: 引数なし → 全て実行（選択UIをスキップ）
+> どの検証を実行しますか？
 
-2. 選択されたツールを**並列で**サブエージェントとして起動する（Taskツールを使用）:
-   - テスト → test-checker エージェント（subagent_type: test-checker）
-   - 静的検証 → code-checker エージェント（subagent_type: code-checker）
-   - 動的検証 → visual-checker エージェント（subagent_type: visual-checker）
+| label | description |
+|-------|------------|
+| 全部実行（Recommended） | テスト + 静的検証 + 動的検証 を一括実行 |
+| テスト | テスト生成＋実行（ユニット・インテグレーション・E2E） |
+| 静的検証 | 依存関係・リント・型チェック・ビルド確認 |
+| 動的検証 | ブラウザで画面確認 |
 
-3. 全エージェントの完了を待ち、結果を統合して報告する
+- 「全部実行」が選ばれた場合 → 3つ全て実行（他の選択は無視）
+- それ以外 → 選択されたものだけ実行
+
+---
+
+## 2. コンテキスト収集
+
+サブエージェントに渡すプロジェクト文脈を収集する。
+
+以下のファイルを Read で読む（存在しないものはスキップ）:
+
+1. `docs/CORE.md` — 誰の課題を解決するプロダクトか
+2. `docs/ARCHITECTURE.md` — データモデル・API設計・認証方式・外部連携
+
+読み取った内容から、以下の `{project_context}` ブロックを組み立てる:
+
+```
+## プロジェクト文脈
+- プロダクト概要: （CORE.md の「一言で言うと」）
+- 技術スタック: （ARCHITECTURE.md の技術スタックテーブル）
+- データモデル: （ARCHITECTURE.md の主要モデル一覧）
+- 認証方式: （ARCHITECTURE.md の認証・権限設計）
+- 外部連携: （ARCHITECTURE.md の外部API・サービス）
+```
+
+CORE.md も ARCHITECTURE.md も存在しない場合、`{project_context}` は空文字にする。
+
+---
+
+## 3. 実行
+
+選択された検証を **Task ツールのサブエージェントとして並列起動** する:
+
+| 検証 | subagent_type |
+|------|--------------|
+| テスト | test-checker |
+| 静的検証 | code-checker |
+| 動的検証 | visual-checker |
+
+- 全て `run_in_background: true` で並列実行する
+- 選択された Task 呼び出しを **1つのメッセージ内で同時に** 発行すること
+- 各サブエージェントの prompt に `{project_context}` を先頭に付与する:
+
+```
+{project_context}
+
+上記のプロジェクト文脈を踏まえて検証してください。
+```
+
+---
+
+## 4. 結果の集約
+
+全サブエージェントの完了を TaskOutput で待ち、結果を統合して報告する
 
 ## 報告フォーマット
 
