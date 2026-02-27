@@ -1,55 +1,46 @@
 ---
 name: infra-setup
-description: 本番インフラの初期セットアップ（モード判定・Git初期化・GitHub作成・プラットフォーム作成）& 全項目検証
+description: 本番インフラの初期セットアップ（Git初期化・GitHub作成・プラットフォーム作成・デプロイ設定・ドメイン・DBバックアップ・ブランチ戦略・エラーハンドリング・監視）
 tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Task
 user_invocable: true
 model: opus
 ---
 
-# infra-setup（モード判定 + Part 0 + 検証）
+# infra-setup
 
-本番運用の基盤をセットアップし、準備状況を検証する。
-
-- **初回（セットアップモード）**: ARCHITECTURE.md を読み、Part 0（リポジトリ & プラットフォーム）をセットアップ → 次のスキルを案内
-- **2回目以降（検証モード）**: セットアップ済みの全項目が正しく動いているか検証する
+本番運用の基盤をセットアップする（1回きり）。
 
 ---
 
-## 0. モード判定
+## 前提チェック
 
 プロジェクトの `CLAUDE.md` を読む。
 
-- `infra-setup: done` が**ない** → セットアップモードへ
-- `infra-setup: done` が**ある** → 検証モードへ
+- `infra-setup: done` が**ある** → 「セットアップ済みです」と案内して終了
+- `infra-setup: done` が**ない** → セットアップ開始
 
----
-
-## セットアップモード
-
-### Step 0: ARCHITECTURE.md の読み込み
-
-`docs/ARCHITECTURE.md` を読み込む。特に以下のセクションから運用方針を把握する:
+`docs/ARCHITECTURE.md` を読み込む。特に以下を把握:
 - 技術スタック（言語・FW・ホスティング先）
-- エラーハンドリング・監視（エラー通知ツール・ログ方針）
+- エラーハンドリング・監視
 - 認証・権限設計
 - API設計（外部サービス依存）
 
-ARCHITECTURE.md がなければ「先に /draft で設計を固めよう」と伝えて終了する。
+ARCHITECTURE.md がなければ「先に /kickoff で設計を固めよう」と伝えて終了する。
 
 ---
 
-### 【Part 0: リポジトリ & プラットフォーム】
+## Part 0: リポジトリ & プラットフォーム
 
 以下を順に確認し、未セットアップなら実行する。既に完了している項目はスキップ。
 
-### Step 0.1: Git初期化
+### Step 1: Git初期化
 
 `.git` ディレクトリの存在を確認する。
 
 - **存在する** → スキップ
 - **存在しない** → `git init` を実行
 
-### Step 0.2: GitHubリポジトリ作成
+### Step 2: GitHubリポジトリ作成
 
 `git remote -v` を**実行して**リモートの有無を確認する。
 
@@ -61,12 +52,12 @@ ARCHITECTURE.md がなければ「先に /draft で設計を固めよう」と�
   3. 初期コミット: 現在のファイルを個別に `git add` & commit
   4. 初期プッシュ: `git push -u origin master`
 
-### Step 0.3: デプロイプラットフォーム作成
+### Step 3: デプロイプラットフォーム作成
 
 ARCHITECTURE.md の技術スタック（ホスティング先）に応じて、プラットフォームの存在を確認し、なければ作成する。
 
 | ホスティング先 | 存在確認 | 作成コマンド |
-|--------------|----------|------------|
+|--|--|--|
 | Cloudflare Pages | `npx wrangler pages project list` で確認 | `npx wrangler pages project create {プロジェクト名}` → GitHub連携 |
 | Heroku | `heroku apps:info` で確認 | `heroku create {プロジェクト名}` → `git remote add heroku ...` |
 | Railway | `railway status` で確認 | `railway init` → GitHub連携 |
@@ -75,89 +66,277 @@ ARCHITECTURE.md の技術スタック（ホスティング先）に応じて、�
 
 各ステップで失敗したら修正を試み、ダメならユーザーに報告して判断を仰ぐ。
 
----
+### Step 4: デプロイ設定
 
-### Part 0 完了: CLAUDE.md に記録
+#### 4a. 設定ファイルの自動チェック
 
-CLAUDE.md に以下を追記する:
+Glob で**プロジェクトルートを自動スキャン**し、以下の有無をチェック:
+
+| ホスティング先 | 必要なファイル |
+|--------------|--------------|
+| Heroku | `Procfile` |
+| Railway | `Procfile` or `railway.json` or `nixpacks.toml` |
+| Vercel | `vercel.json`（任意） |
+| Render | `render.yaml`（任意） |
+| AWS | `Dockerfile` or `buildspec.yml` |
+| Docker系 | `Dockerfile`, `docker-compose.yml` |
+
+**不足がある場合:**
+技術スタックに応じた設定ファイルを生成し、ユーザー確認後に書き込む。
+
+#### 4b. ビルド設定の確認
+
+Gemfile / package.json 等を Read で確認し、本番ビルドに必要な依存が揃っているか検証する。
+
+**問題がある場合:**
+修正を提案し、ユーザー確認後に実行。
+
+#### 4c. FTPデプロイのワークフロー生成
+
+CLAUDE.md または ARCHITECTURE.md の技術スタック（ホスティング先）に「WebARENA」「FTP」「共用サーバー」等の記載があるか確認する。
+
+**該当しない** → スキップ
+
+**該当する** → `.github/workflows/deploy.yml` が既に存在するか Glob で確認する:
+
+- **存在する** → スキップ
+- **存在しない** → 以下を順に実行:
+
+**1. FTP接続情報をヒアリング**
+
+AskUserQuestion で以下を聞く（1回の呼び出しにまとめる）:
+
+**質問A: FTPサーバーのホスト名**
+- Other で直接入力（例: `example.com`）
+
+**質問B: FTPのアップロード先ディレクトリ**
+- `/public_html`（Recommended）
+- `/httpdocs`
+- `/`
+- Other で直接入力
+
+**2. ワークフローファイルを自動生成**
+
+`.github/workflows/` ディレクトリを作成し、`deploy.yml` を Write で作成する:
+
+```yaml
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - {ブランチ名}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            .claude/**
+            docs/**
+            composer.json
+            composer.lock
+            CLAUDE.md
+            README.md
+```
+
+**3. CLAUDE.md にデプロイ情報を追記**
+
+Git 運用セクションに以下を追加:
 
 ```markdown
-# 運用設定
-infra-setup-progress: part0
+- デプロイ: GitHub Actions → FTP自動デプロイ（`.github/workflows/deploy.yml`）
+- FTP接続情報: GitHub Secrets（`FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FTP_SERVER_DIR`）
+```
+
+**4. GitHub Secrets の登録を案内し、確認を待つ**
+
+**必ず**以下のメッセージを表示する。**ユーザーが Secrets 登録済みと回答するまで次のステップに進まない。**
+
+---
+
+**GitHub Secrets の設定が必要です。** 以下の4つを GitHub リポジトリに登録してください:
+
+1. リポジトリの **Settings → Secrets and variables → Actions** を開く
+2. 「New repository secret」から以下を追加:
+
+| Secret名 | 値 |
+|---|---|
+| `FTP_SERVER` | {ヒアリングで得たホスト名} |
+| `FTP_USERNAME` | FTPユーザー名 |
+| `FTP_PASSWORD` | FTPパスワード |
+| `FTP_SERVER_DIR` | {ヒアリングで得たディレクトリ} |
+
+設定後、`master` への push で自動的にFTPデプロイが実行されます。
+
+---
+
+AskUserQuestion で「Secrets を登録しましたか？」と確認する:
+- 「はい、登録した」→ 次のステップへ
+- 「まだ」→ 登録を待つ
+
+### Step 5: ドメイン・SSL
+
+#### 5a. 現状を自動チェック
+
+ホスティング先に応じたコマンドを**実行して**ドメイン設定を確認:
+
+- **Heroku**: `heroku domains` を実行
+- **Railway / Vercel**: 該当CLIコマンドを実行
+
+#### 5b. 未設定の場合
+
+AskUserQuestion で質問:
+
+> カスタムドメインを使いますか？
+
+選択肢: 使う（取得済み） / 使う（まだ取得していない） / デフォルトURLで運用
+
+**「使う（取得済み）」の場合:**
+ホスティング先に応じたコマンドを**実行して**設定:
+- **Heroku**: `heroku domains:add example.com` を実行 → DNS設定を案内
+- **その他**: 該当コマンドを実行
+
+---
+
+## Part A: 守りのインフラ
+
+Step 6（DBバックアップ確認） + Step 7（ブランチ確認） + Step 8a（エラーハンドラ確認）は独立しているため、Task で並列に自動チェックを実行する。結果を集約した後、未設定の項目を順にセットアップする。
+
+### Step 6: DBバックアップ
+
+#### 6a. 現状を自動チェック
+
+ホスティング先に応じたコマンドを**実行して**現状を確認する:
+
+- **Heroku Postgres**: `heroku pg:backups:schedules` を実行してスケジュールの有無を確認
+- **Railway**: `railway variables` でDB関連変数を確認
+- **その他**: ユーザーに質問
+
+#### 6b. 未設定の場合 → 設定を実行
+
+**Heroku の場合:**
+1. `heroku pg:backups:schedule DATABASE_URL --at '04:00 Asia/Tokyo'` を実行
+2. `heroku pg:backups:schedules` で設定結果を確認表示
+3. 復元テストの実施を推奨（`heroku pg:backups:capture` → `heroku pg:backups:url` で取得可能と案内）
+
+**その他のホスティング:**
+- AWS RDS / 自前PostgreSQL / MySQL / SQLite: 手順を案内し、可能な範囲でコマンド実行を支援
+
+### Step 7: ブランチ戦略
+
+`git branch -a` を**実行して**現在のブランチ構成を確認する。
+
+mainブランチ（またはmaster）のみの場合、AskUserQuestion で質問:
+
+> 本番ブランチに直接プッシュしています。開発用ブランチを分けますか？
+
+選択肢: 分ける / このままでいい
+
+**「分ける」の場合:**
+- `git checkout -b develop` を実行
+- CLAUDE.md に `default-branch: develop` を記録
+
+**「このままでいい」の場合:**
+- リスクを伝えた上でスキップ
+
+### Step 8: エラーハンドリング・監視
+
+ARCHITECTURE.md の「エラーハンドリング・監視」セクションを参照し、以下を順に実施する。
+
+#### 8a. グローバルエラーハンドラ
+
+Glob/Read で**自動チェック**:
+- **Rails**: `ApplicationController` に `rescue_from` があるか確認
+- **Express**: グローバルエラーミドルウェアがあるか確認
+- **Next.js**: `error.tsx` / `_error.js` があるか確認
+
+**存在しない場合:**
+技術スタックに基づいてエラーハンドラを生成し、ユーザー確認後に書き込む。
+
+#### 8b. エラー通知
+
+プロジェクトで既に使っている通知チャネルを確認し、エラー通知もそこに統一する。
+新しい外部サービスを増やすより、既存の仕組みに載せる方がシンプル。
+
+**判断フロー:**
+1. ARCHITECTURE.md + コード（Gemfile/package.json、通知関連サービス）から既存の通知チャネルを特定
+2. 既存チャネルにエラー通知を統合する方法を提案
+
+**例: Pushover が既にある場合（Rails）:**
+1. `bundle add exception_notification` を**実行**
+2. `config/initializers/exception_notification.rb` を生成して**書き込む**
+   - Pushover notifier を設定（既存の環境変数 `PUSHOVER_USER_KEY` / `PUSHOVER_API_TOKEN` を使用）
+3. テスト: `heroku run rails runner "raise 'test error'"` で通知が届くか確認
+
+**例: Slack が既にある場合:**
+1. `exception_notification` + Slack webhook で統合
+
+**既存チャネルがない場合:**
+AskUserQuestion で「エラー通知をどこに送りますか？」と確認（Pushover / Slack / Email / Sentry）
+
+#### 8c. ヘルスチェックエンドポイント
+
+Glob/Grep で `/health` または `/up` エンドポイントが存在するか**自動チェック**する。
+
+**存在しない場合:**
+技術スタックに応じたヘルスチェックエンドポイントを生成（DB接続確認含む）し、ユーザー確認後に書き込む。
+
+**存在する場合:**
+本番URLに対して `curl` でヘルスチェックを**実行して**応答を確認する（URLがわかる場合）。
+
+#### 8d. 死活監視
+
+AskUserQuestion で質問:
+
+> 死活監視は設定済みですか？
+
+選択肢: 設定済み / まだ / 本番公開していない
+
+**「まだ」の場合:**
+- UptimeRobot（無料、5分間隔）の登録手順を案内
+
+---
+
+## 完了: CLAUDE.md に記録
+
+CLAUDE.md に以下を記録する:
+
+```markdown
+infra-setup: done
 infra-setup-items:
-  # Part 0: リポジトリ & プラットフォーム
+  # リポジトリ & プラットフォーム
   git-repo: {設定済み|既存}
   github-remote: {設定済み|既存}
   deploy-platform: {設定済み|既存|不要}
+  deploy-config: {設定済み|スキップ|不要}
+  domain-ssl: {設定済み|スキップ|後で}
+  # 守りのインフラ
+  db-backup: {設定済み|スキップ|不要}
+  branch-strategy: {設定済み|スキップ}
+  error-handler: {設定済み|スキップ}
+  error-notification: {設定済み|スキップ}
+  health-check: {設定済み|スキップ}
+  uptime-monitor: {設定済み|スキップ|後で}
 ```
 
 ユーザーに以下を案内する:
 
-> Part 0（リポジトリ & プラットフォーム）が完了しました。
-> 次は `/infra-setup-guard` を実行してください（守りのインフラ: DBバックアップ・ブランチ戦略・エラー監視）。
-
----
-
-## 検証モード
-
-`infra-setup: done` がある場合に実行。CLAUDE.md の `infra-setup-items` を読み、各項目を**コマンド実行で**検証する。
-
-独立したチェックは Task で並列実行する:
-- Part 0（Git・GitHub・プラットフォーム） + Part A（DB・ブランチ・エラー） + Part B（デプロイ・環境変数・外部サービス）
-
-### 検証内容
-
-| 項目 | 検証方法 |
-|------|----------|
-| **Part 0: リポジトリ & プラットフォーム** | |
-| Gitリポジトリ | `.git` 存在確認 |
-| GitHubリモート | `git remote -v` で確認 |
-| デプロイプラットフォーム | ホスティング先CLIで存在・接続確認 |
-| **Part A: 守りのインフラ** | |
-| DBバックアップ | `heroku pg:backups:schedules` 等を実行して確認 |
-| ブランチ戦略 | `git branch -a` を実行して確認 |
-| エラーハンドラ | Glob/Read でコードが存在するか確認 |
-| エラー通知 | Gemfile/package.json でSDKの存在 + 初期化コード確認 |
-| ヘルスチェック | コード確認 + `curl` で本番エンドポイントを実行確認 |
-| 死活監視 | ユーザーに現状を確認 |
-| **Part B: 本番接続** | |
-| デプロイ設定 | Procfile/Dockerfile 等の存在を Glob で確認 |
-| 環境変数 | コードから再収集 → `heroku config` 等を実行して過不足照合 |
-| 外部サービス | 環境変数の存在をホスティング先の config で自動判定 |
-| ドメイン・SSL | `heroku domains` 等を実行して確認 |
-| 本番DB | `heroku run rails db:migrate:status` 等を実行して確認 |
-| スモークテスト | `curl` で本番URL応答を実行確認 |
-
-### 検証結果の表示形式
-
-```
-運用チェック:
-
-【Part 0: リポジトリ & プラットフォーム】
-✅ Gitリポジトリ: .git 確認OK
-✅ GitHubリモート: origin → github.com/...
-✅ デプロイプラットフォーム: Heroku app 確認OK
-
-【Part A: 守りのインフラ】
-✅ DBバックアップ: スケジュール確認OK（毎日04:00 JST）
-✅ ブランチ: develop ブランチあり
-✅ エラーハンドラ: rescue_from 確認OK
-✅ エラー通知: sentry-rails gem + 初期化コード確認OK
-✅ ヘルスチェック: /up → 200 OK
-⚠️ 死活監視: 未設定
-
-【Part B: 本番接続】
-✅ デプロイ設定: Procfile 確認OK
-⚠️ 環境変数: DEEPL_API_KEY がコードに追加されたが本番に未設定
-✅ 外部サービス: Twilio/DeepL の環境変数確認OK
-✅ ドメイン・SSL: example.herokuapp.com
-✅ 本番DB: 未実行マイグレーションなし
-✅ スモークテスト: 全エンドポイント応答OK
-```
-
-「スキップ」だった項目は「前回スキップしました。今回設定しますか？」と再提案する。
-「❌」の項目はセットアップモードと同じ手順で修復を実行する。
-「⚠️」の項目は差分や変更点を具体的に示し、修正コマンドを提示・実行する。
+> インフラセットアップが完了しました。
+> リリース準備ができたら `/release-setup` を実行してください。
 
 ---
 
@@ -167,10 +346,10 @@ infra-setup-items:
 - **確認・診断系コマンドは即実行する**（案内ではなく実行結果を見せる）
 - **変更・設定系コマンドはユーザー確認後に実行する**（案内だけで終わらせない）
 - AskUserQuestion は判断が必要な分岐点でのみ使う
+- セットアップモードではコードの生成・編集を行う（エラーハンドラ、通知初期化、ヘルスチェック等）
 - 外部サービスのAPIキー・シークレットは絶対にコードにハードコードしない（環境変数を案内する）
 - 本番への破壊的操作（DB変更、force push等）は必ずユーザー確認を取る
-- 「後でやる」は `後で` として記録（検証モードで再提案される）
-- 「不要」「このままでいい」は `スキップ` として記録
+- 「後でやる」は `後で` として記録、「不要」「このままでいい」は `スキップ` として記録
 
 ### UI操作の案内ルール
 

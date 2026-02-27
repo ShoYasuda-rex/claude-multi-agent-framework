@@ -59,11 +59,30 @@ user_invocable: true
 - **Docker の場合:** `docker compose up -d` を実行（バックグラウンド不要、detachedモードで起動）
 - **それ以外:** 特定したコマンドを Bash でバックグラウンド実行する（`run_in_background: true`）
 - 起動ログからポート番号を検出する
+- **ビルド/起動がエラーで失敗した場合** → ステップ3.5 のトラブルシューティングへ
+
+### 3.5. トラブルシューティング（起動失敗時のみ）
+
+起動コマンドがエラーで失敗した場合、エラーメッセージから原因を判別し**自動修正を試みる**。修正後、ステップ3に戻って再起動する。最大2回まで自動修正を試み、それでも失敗したらユーザーに報告する。
+
+よくあるエラーと自動修正パターン:
+
+| エラーパターン | 原因 | 自動修正 |
+|--|--|--|
+| `Gemfile.lock: not found`（Docker ビルド） | ロックファイル未生成 | Dockerfile の `COPY Gemfile Gemfile.lock ./` → `COPY Gemfile Gemfile.lock* ./` に修正 |
+| `package-lock.json: not found`（Docker ビルド） | ロックファイル未生成 | 同上（`COPY package.json package-lock.json* ./`） |
+| ソケット接続エラー（`/var/run/postgresql/.s.PGSQL.5432`） | database.yml が Docker ネットワーク未対応 | docker-compose.yml の environment を確認し、database.yml に `host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>` 等を追加 |
+| `database "xxx" does not exist` | DB 未作成 | Docker: `docker compose run --rm web bin/rails db:create db:migrate` / 非Docker: `bin/rails db:create db:migrate` |
+| `Migrations are pending` | マイグレーション未実行 | Docker: `docker compose run --rm web bin/rails db:migrate` / 非Docker: `bin/rails db:migrate` |
+| `Module not found` / `Cannot find module` | node_modules 未インストール | `npm install` |
+| `Could not find gem` / `bundle install` 要求 | gem 未インストール | Docker: `docker compose run --rm web bundle install` / 非Docker: `bundle install` |
+
+上記に該当しないエラーの場合は、エラーログを表示してユーザーに報告する。
 
 ### 4. 起動確認
 
 - サーバーが正しく起動したか検証する（起動後2秒待ってからポートの LISTEN 状態を確認）
-- **起動失敗の場合**（ポートが開いていない）→ 起動ログを表示してユーザーに報告し、ブラウザは開かない
+- **起動失敗の場合**（ポートが開いていない）→ `docker compose logs` 等で起動ログを確認し、ステップ3.5 のパターンに該当すればトラブルシューティングへ。該当しなければユーザーに報告
 - **起動成功の場合** → ステップ5へ
 
 ### 5. ブラウザで開く
