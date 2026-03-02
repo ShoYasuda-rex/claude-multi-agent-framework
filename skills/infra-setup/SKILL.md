@@ -54,17 +54,67 @@ ARCHITECTURE.md がなければ「先に /kickoff で設計を固めよう」と
 
 ### Step 3: デプロイプラットフォーム作成
 
-ARCHITECTURE.md の技術スタック（ホスティング先）に応じて、プラットフォームの存在を確認し、なければ作成する。
+ARCHITECTURE.md の技術スタック（ホスティング先）に応じて、プラットフォームの存在を確認する。
+**プラットフォームの作成はCLIで行わず、ダッシュボードでの手順を案内する。** これにより GitHub OAuth連携など、CLI経由では選べない連携方式をユーザーが選択できる。
 
-| ホスティング先 | 存在確認 | 作成コマンド |
-|--|--|--|
-| Cloudflare Pages | `npx wrangler pages project list` で確認 | `npx wrangler pages project create {プロジェクト名}` → GitHub連携 |
-| Heroku | `heroku apps:info` で確認 | `heroku create {プロジェクト名}` → `git remote add heroku ...` |
-| Railway | `railway status` で確認 | `railway init` → GitHub連携 |
-| Vercel | `vercel ls` で確認 | `vercel` → GitHub連携 |
-| その他 | ARCHITECTURE.md の指定に従う | ユーザーに確認しながら実行 |
+#### 3a. 存在確認（CLIで即実行）
 
-各ステップで失敗したら修正を試み、ダメならユーザーに報告して判断を仰ぐ。
+| ホスティング先 | 確認コマンド |
+|--|--|
+| Cloudflare Pages | `npx wrangler pages project list` |
+| Heroku | `heroku apps:info` |
+| Railway | `railway status` |
+| Vercel | `vercel ls` |
+| その他 | ARCHITECTURE.md の指定に従う |
+
+**存在する** → スキップ
+
+#### 3b. 未作成の場合 → ダッシュボードでの作成手順を案内
+
+ホスティング先に応じた**ステップ番号付きの具体的な手順**を表示する。
+
+**Cloudflare Pages の場合:**
+1. https://dash.cloudflare.com/ を開く
+2. 左メニューの「Workers & Pages」をクリック
+3. 「Create」をクリック
+4. 「Pages」タブを選択
+5. 「Connect to Git」をクリック
+6. GitHubアカウントを連携し、対象リポジトリ `{プロジェクト名}` を選択
+7. ビルド設定を入力（フレームワーク・ビルドコマンド・出力ディレクトリはARCHITECTURE.mdから提示）
+8. 「Save and Deploy」をクリック
+
+**Heroku の場合:**
+1. https://dashboard.heroku.com/new-app を開く
+2. App name に `{プロジェクト名}` を入力
+3. Region を選択（United States / Europe）
+4. 「Create app」をクリック
+5. Deploy タブ → 「GitHub」を選択 → リポジトリを検索して「Connect」
+6. 「Enable Automatic Deploys」で自動デプロイを有効化
+
+**Railway の場合:**
+1. https://railway.com/new を開く
+2. 「Deploy from GitHub repo」を選択
+3. 対象リポジトリ `{プロジェクト名}` を選択
+4. 設定を確認して「Deploy」
+
+**Vercel の場合:**
+1. https://vercel.com/new を開く
+2. 「Import Git Repository」から対象リポジトリを選択
+3. ビルド設定を確認して「Deploy」
+
+**その他:**
+ARCHITECTURE.md の指定に従い、該当プラットフォームのダッシュボード手順を案内する。
+
+#### 3c. 完了確認
+
+AskUserQuestion で確認:
+
+> プラットフォームの作成は完了しましたか？
+
+選択肢: はい、完了した / まだ（後でやる）
+
+- **「完了した」** → 3a の確認コマンドを再実行して接続を検証 → 次のステップへ
+- **「後でやる」** → `後で` として記録し次のステップへ
 
 ### Step 4: デプロイ設定
 
