@@ -317,26 +317,71 @@ Glob/Read で**自動チェック**:
 **存在しない場合:**
 技術スタックに基づいてエラーハンドラを生成し、ユーザー確認後に書き込む。
 
-#### 8b. エラー通知
+#### 8b. エラー監視（Sentry）
 
-プロジェクトで既に使っている通知チャネルを確認し、エラー通知もそこに統一する。
-新しい外部サービスを増やすより、既存の仕組みに載せる方がシンプル。
+Sentry をエラー監視基盤として導入する（推奨）。
+単なる通知ではなく、エラーの自動分類・スタックトレース・影響ユーザー数の集約ができる。
 
-**判断フロー:**
-1. ARCHITECTURE.md + コード（Gemfile/package.json、通知関連サービス）から既存の通知チャネルを特定
-2. 既存チャネルにエラー通知を統合する方法を提案
+**1. 既存の Sentry 導入を自動チェック**
 
-**例: Pushover が既にある場合（Rails）:**
-1. `bundle add exception_notification` を**実行**
-2. `config/initializers/exception_notification.rb` を生成して**書き込む**
-   - Pushover notifier を設定（既存の環境変数 `PUSHOVER_USER_KEY` / `PUSHOVER_API_TOKEN` を使用）
-3. テスト: `heroku run rails runner "raise 'test error'"` で通知が届くか確認
+Grep で Sentry SDK の有無を確認:
+- `package.json` に `@sentry/node` / `@sentry/browser` / `@sentry/cloudflare` 等
+- `Gemfile` に `sentry-ruby` / `sentry-rails`
+- コード内に `Sentry.init` / `Sentry.captureException`
 
-**例: Slack が既にある場合:**
-1. `exception_notification` + Slack webhook で統合
+**導入済み** → DSN が環境変数になっているか確認 → スキップ
 
-**既存チャネルがない場合:**
-AskUserQuestion で「エラー通知をどこに送りますか？」と確認（Pushover / Slack / Email / Sentry）
+**2. 未導入の場合 → セットアップ**
+
+AskUserQuestion で確認:
+
+> エラー監視に Sentry を導入します（推奨）。Sentry はエラーの自動分類・集約・分析ができ、後から `/sentry` スキルで本番エラーを一括分析できます。
+
+選択肢: Sentry を導入する（Recommended） / 別の方法を使う / スキップ
+
+**「Sentry を導入する」の場合:**
+
+a. **Sentry プロジェクト作成を案内**（ダッシュボード操作）:
+   1. https://sentry.io/organizations/ を開く（アカウントがなければ無料で作成）
+   2. 「Create Project」をクリック
+   3. プラットフォームを選択（技術スタックに応じて提示）
+   4. プロジェクト名に `{プロジェクト名}` を入力
+   5. 「Create Project」をクリック
+   6. 表示される DSN をコピー
+
+b. AskUserQuestion で「Sentry の DSN を入力してください」と確認
+
+c. **SDK をインストール**（技術スタックに応じて実行）:
+
+| スタック | コマンド |
+|---------|---------|
+| Node.js / Workers | `npm install @sentry/node` or `@sentry/cloudflare` |
+| Rails | `bundle add sentry-ruby sentry-rails` |
+| Next.js | `npx @sentry/wizard@latest -i nextjs` |
+| ブラウザのみ（バニラJS） | CDN スクリプトタグを追加 |
+
+d. **初期化コードを生成して書き込む**（技術スタックに応じたファイルに）
+
+e. **DSN を環境変数として設定**:
+   - ローカル: `.env` に `SENTRY_DSN=...` を追加
+   - 本番: ホスティング先の環境変数設定を案内
+
+f. **動作確認**: テストエラーを発生させ、Sentry ダッシュボードに表示されるか確認
+
+**「別の方法を使う」の場合:**
+既存の通知チャネル（Pushover / Slack 等）にエラー通知を統合する方法を提案・実行する。
+
+#### 8b-2. エラー通知先（任意）
+
+Sentry 導入後、アラート通知先を設定する。Sentry のデフォルトはメール通知。
+
+AskUserQuestion で質問:
+
+> Sentry のアラートをどこに送りますか？（Sentry ダッシュボードでの確認のみでもOK）
+
+選択肢: メール通知のみ（デフォルト） / Slack / Pushover / スキップ
+
+- **Slack / Pushover**: Sentry の Integrations 設定手順を案内
 
 #### 8c. ヘルスチェックエンドポイント
 
@@ -378,6 +423,7 @@ infra-setup-items:
   db-backup: {設定済み|スキップ|不要}
   branch-strategy: {設定済み|スキップ}
   error-handler: {設定済み|スキップ}
+  sentry: {設定済み|スキップ|別の方法}
   error-notification: {設定済み|スキップ}
   health-check: {設定済み|スキップ}
   uptime-monitor: {設定済み|スキップ|後で}
