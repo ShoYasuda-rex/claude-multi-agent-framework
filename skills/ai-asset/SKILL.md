@@ -1,5 +1,5 @@
 ---
-name: make-asset
+name: ai-asset
 description: ローカルFLUX.1サーバーでAI画像アセットを生成・配置・クレジット管理
 model: opus
 user_invocable: true
@@ -10,9 +10,9 @@ user_invocable: true
 ローカル FLUX.1 OpenVINO サーバー（`http://127.0.0.1:8188`）を使って、プロジェクト用の画像アセットをAI生成するスキル。
 フリー素材では見つからない・プロジェクト固有のビジュアルが必要なときに使う。
 
-> **get-asset との使い分け**:
-> `/get-asset` — フリー素材を調達（ライセンス確認付き）
-> `/gen-asset` — AI で画像を生成（プロジェクト固有のビジュアル）
+> **web-asset との使い分け**:
+> `/web-asset` — フリー素材を調達（ライセンス確認付き）
+> `/ai-asset` — AI で画像を生成（プロジェクト固有のビジュアル）
 
 ---
 

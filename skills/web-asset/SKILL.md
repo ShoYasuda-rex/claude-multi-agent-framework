@@ -1,5 +1,5 @@
 ---
-name: get-asset
+name: web-asset
 description: 画像・SE・BGMのフリーアセットを調査・取得・クレジット管理まで自動化
 model: opus
 user_invocable: true

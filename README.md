@@ -59,7 +59,8 @@
 
 | コマンド | 概要 |
 |---------|------|
-| `/get-asset` | フリーアセット（画像・SE・BGM）の調査→取得→配置→クレジット管理 |
+| `/web-asset` | フリーアセット（画像・SE・BGM）の調査→取得→配置→クレジット管理 |
+| `/ai-asset` | ローカルFLUX.1サーバーでAI画像アセットを生成→配置→クレジット管理 |
 | `/backup` | 現在の状態を git コミットで保存（push しない） |
 | `/rollback` | 直近コミットから復元先を選択 |
 | `/gen-arch` | コード実態からアーキテクチャドキュメントを自動生成 |
@@ -85,12 +86,12 @@
 │   ├── audit-architecture-checker.md
 │   ├── audit-law-checker.md
 │   └── log-checker.md
-├── skills/           # スキル定義（17種）
+├── skills/           # スキル定義（18種）
 │   ├── kickoff/        mockup/        local/
 │   ├── parallel/       verify/        audit/
 │   ├── deploy/         backup/        rollback/
 │   ├── infra-setup/    release-setup/
-│   ├── research-team/  gen-arch/      get-asset/
+│   ├── research-team/  gen-arch/      web-asset/  ai-asset/
 │   ├── feature-trainer/  fullstack-trainer/  solo-trainer/
 ├── docs/             # フロー詳細ドキュメント
 ├── CLAUDE.md         # 共通ルール
