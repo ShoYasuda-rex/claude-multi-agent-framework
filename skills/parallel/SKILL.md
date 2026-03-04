@@ -15,12 +15,21 @@ model: opus
 
 リーダー（メインチャット）は調整のみ。実装はしない。
 
+## 原則: 全操作worktree分離
+
+**全てのサブエージェントは `isolation: "worktree"` で起動する。例外なし。**
+
+- タスクが1個でもworktreeで実行する
+- mainは常にクリーンな状態を保つ（誰も直接触らない）
+- 完了したものから順にmainへマージ
+- 衝突はマージ時にgitが検知 → 手動解決
+
 ## フロー
 
-1. 指示をタスクに分割（2〜5個、同一ファイル編集は1エージェントにまとめる）
-2. 複数エージェントが別ファイルを同時編集する場合は `isolation: "worktree"` で起動する
-3. 1つのメッセージで全エージェントを並列起動
-4. 結果を統合してユーザーに報告（worktreeの場合は変更をマージ）
+1. 指示をタスクに分割（1〜5個、同一ファイル編集は1エージェントにまとめる）
+2. 全エージェントを `isolation: "worktree"` で起動（1つのメッセージで並列起動）
+3. 完了したworktreeから順にmainへマージ
+4. 衝突があれば解決し、結果を統合してユーザーに報告
 
 ## サブエージェント起動テンプレート
 
@@ -28,6 +37,7 @@ model: opus
 Task tool:
   subagent_type: general-purpose
   mode: bypassPermissions
+  isolation: "worktree"
   prompt: |
     以下のタスクを実装してください。
     EnterPlanModeは使うな。AskUserQuestionは使うな。確認せず即実行しろ。
