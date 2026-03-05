@@ -82,12 +82,14 @@ AskUserQuestion で確認:
 種別に応じて調査先を切り替える:
 
 ### 画像（イラスト・アイコン・ドット絵）
-1. **Kenney.nl** — 高品質CC0、UIアセット・アイコン豊富、直接DL可
-   - URL: `https://kenney.nl/assets?q={query}`
-2. **OpenGameArt.org** — CC0多数、2Dアート全般
-   - URL: `https://opengameart.org/art-search-advanced?keys={query}&field_art_type_tid[]=9` (2D Art)
-3. **itch.io** — 量が圧倒的、ライセンス明記のもののみ
+1. **itch.io** — 唯一の画像ソース。量・質ともに最強、透過PNG多い、ライセンス明記のもののみ
    - URL: `https://itch.io/game-assets/tag-{query}`
+   - 検索時は `tag-transparent-background` も併用して透過素材を優先
+
+### 画像の選定基準（必須）
+- **透過PNG優先** — 背景色付き画像は候補の優先度を下げる
+- **個別ファイル優先** — スプライトシート1枚だけの配布より、個別切り出し済みのパックを優先
+- **候補提示時に背景透過の有無を明記** — テーブルに「透過」列を追加
 
 ### SE（効果音）
 1. **効果音ラボ** — 日本語、商用OK、クレジット不要、ログイン不要
@@ -96,14 +98,6 @@ AskUserQuestion で確認:
 2. **魔王魂** — 日本語、商用OK、会員登録不要
    - URL: `https://maou.audio/category/se/`
    - 検索クエリは日本語で実行
-3. **Kenney.nl** — 高品質CC0アセット
-   - URL: `https://kenney.nl/assets?q={query}`
-4. **OpenGameArt.org** — CC0/CC-BY多数
-   - URL: `https://opengameart.org/art-search-advanced?keys={query}&field_art_type_tid[]=13` (Sound Effect)
-5. **Freesound.org** — 要APIキー認証（セットアップ済みの場合のみ）
-   - API: `https://freesound.org/apiv2/search/text/?query={query}&token={api_key}`
-   - 認証セットアップは「認証付きソース」セクション参照
-   - 未認証ならスキップ
 
 ### BGM
 1. **魔王魂** — 日本語、商用OK、会員登録不要
@@ -112,13 +106,6 @@ AskUserQuestion で確認:
 2. **DOVA-SYNDROME** — 日本語、商用OK、ログイン不要
    - URL: `https://dova-s.jp/_contents/search/?keyword={query}`
    - 検索クエリは日本語で実行
-3. **OpenGameArt.org** — CC0/CC-BY多数
-   - URL: `https://opengameart.org/art-search-advanced?keys={query}&field_art_type_tid[]=12` (Music)
-4. **Kenney.nl** — CC0
-   - URL: `https://kenney.nl/assets?q={query}`
-5. **Freesound.org** — 要APIキー認証（セットアップ済みの場合のみ）
-   - API: `https://freesound.org/apiv2/search/text/?query={query}&filter=type:music&token={api_key}`
-   - 未認証ならスキップ
 
 ### 共通
 - WebSearch も併用して最新のアセットパックを探す
@@ -150,11 +137,11 @@ AskUserQuestion で確認:
 ```
 ## 調査結果: {種別} - {用途}
 
-| # | アセット名 | ソース | ライセンス | 形式 | プレビュー |
-|---|-----------|--------|-----------|------|-----------|
-| 1 | {name}    | OpenGameArt | CC0 | PNG 16x16 | [見る/聴く]({preview_url}) |
-| 2 | {name}    | Kenney | CC0 | PNG 32x32 | [見る/聴く]({preview_url}) |
-| 3 | {name}    | itch.io | CC-BY | PNG 16x16 | [見る/聴く]({preview_url}) |
+| # | アセット名 | ソース | ライセンス | 形式 | 透過 | プレビュー |
+|---|-----------|--------|-----------|------|------|-----------|
+| 1 | {name}    | itch.io | CC0 | PNG 16x16 | ○ | [見る]({preview_url}) |
+| 2 | {name}    | Kenney | CC0 | PNG 32x32 | ○ | [見る]({preview_url}) |
+| 3 | {name}    | OpenGameArt | CC-BY | PNG 16x16 | × | [見る]({preview_url}) |
 
 ### 推奨: #{番号} {アセット名}
 - 理由: {推奨理由}
@@ -212,23 +199,42 @@ AskUserQuestion で選択を求める:
    - 配置したファイルを `ls -la` で確認
    - 画像の場合は Read ツールでプレビュー表示
 
-## 5-B. アセット変換・加工（必要な場合のみ）
+## 5-B. 背景透過処理（画像アセットは必ず実行）
+
+画像アセットを取得したら、**配置前に必ず背景透過チェックを行う**。
+背景色つきの画像をそのまま使うと四角い枠が見えてしまう。
+
+1. **透過チェック**
+   - `magick identify -verbose {file} | grep -i alpha` でアルファチャンネルの有無を確認
+   - アルファチャンネルがあり背景が透過済みなら → スキップ
+
+2. **単色背景の除去**
+   - 背景色が単色（白・黒・マゼンタ等）の場合:
+   - `magick {input} -fuzz 10% -transparent {背景色} {output}`
+   - 背景色は画像の四隅ピクセルから推定: `magick {input} -crop 1x1+0+0 txt:- | tail -1`
+   - fuzz値は10%から開始、エッジが残る場合は5%に下げて再実行
+
+3. **Readツールで目視確認**
+   - 透過処理後の画像を Read ツールで表示し、ユーザーに確認
+   - 問題があればfuzz値を調整して再実行
+
+## 5-C. アセット変換・加工（必要な場合のみ）
 
 取得したアセットがプロジェクトの要件と合わない場合、以下を実行:
 
 1. **形式変換**
-   - 画像: `magick convert {input} {output}` （ImageMagick）
+   - 画像: `magick {input} {output}` （ImageMagick）
    - 音声: `ffmpeg -i {input} {output}` （FFmpeg）
    - 例: SVG→PNG、WAV→OGG、MP3→OGG
 
 2. **リサイズ・解像度統一**
    - 既存アセットのサイズに合わせてリサイズ
-   - `magick convert {input} -resize {W}x{H} {output}`
+   - `magick {input} -resize {W}x{H} {output}`
    - ドット絵の場合は `-filter Point` でニアレストネイバー
 
-3. **画像の切り出し**
-   - 必要な部分だけ切り出す
-   - `magick convert {input} -crop {W}x{H}+{X}+{Y} {output}`
+3. **スプライトシート分割**（個別ファイルでない場合）
+   - グリッドサイズ指定で一括分割: `magick {input} -crop {W}x{H} +repage {output_prefix}_%d.png`
+   - 分割後に各コマを Read で表示して確認
 
 4. **ツール未インストール時**
    - ImageMagick / FFmpeg が見つからない場合は手動変換を案内して続行
@@ -300,60 +306,15 @@ AskUserQuestion で選択を求める:
 
 ## 制約事項
 
-- **ログイン不要のソースが基本** — ログインが必要なサイトはスキップ。ただし認証セットアップ済みのソース（Freesound等）は利用可
+- **ログイン不要のソースが基本** — ログインが必要なサイトはスキップ
 - **直接DLできないURLはスキップ** — 手動DL案内に切り替え
 - **ライセンス不明はスキップ** — 候補から除外し理由を表示
 - **商用利用不可ライセンスは警告** — NC付きは明示的に警告
 - **ファイルサイズ制限** — 単一ファイル10MB超は警告
 - **形式の優先順位** — 画像: PNG > SVG > GIF > WEBP、SE: WAV > OGG > MP3、BGM: OGG > MP3 > WAV
 
-## 認証付きソース
-
-### Freesound.org（初回セットアップ）
-
-認証情報は `~/.claude/credentials/asset-auth.json` に保存する。
-
-**初回利用時の手順:**
-
-1. `~/.claude/credentials/asset-auth.json` を Read して認証情報の有無を確認
-2. 認証情報がなければ、以下をユーザーに案内:
-   ```
-   Freesound.org のAPIキーが未設定です。セットアップしますか？
-
-   1. https://freesound.org/apiv2/apply/ にアクセス
-   2. アカウント作成（未登録の場合）
-   3. 「Apply for API key」でアプリ名・説明を入力
-   4. 発行された API Key をここに貼り付けてください
-   ```
-3. AskUserQuestion でAPIキーを入力してもらう（「スキップ」選択肢も用意）
-4. 入力されたら `~/.claude/credentials/asset-auth.json` に保存:
-   ```json
-   {
-     "freesound": {
-       "api_key": "{入力されたキー}",
-       "setup_date": "{YYYY-MM-DD}"
-     }
-   }
-   ```
-5. `mkdir -p ~/.claude/credentials` を事前に実行
-6. プロジェクトの `.gitignore` に `credentials/` が含まれていることを確認（なければ警告）
-
-**利用時の手順:**
-
-1. `~/.claude/credentials/asset-auth.json` を Read
-2. `freesound.api_key` が存在すればAPI経由で検索・DL
-3. 存在しなければ Freesound をスキップ（他のソースで続行）
-
-**APIの使い方:**
-- 検索: `https://freesound.org/apiv2/search/text/?query={query}&token={api_key}`
-- DL: `https://freesound.org/apiv2/sounds/{id}/download/?token={api_key}`
-- プレビュー: レスポンスの `previews.preview-hq-mp3` フィールド
-
----
-
 ## 禁止事項
 
 - 著作権が不明なアセットのダウンロード
 - ライセンス条件を無視したクレジット省略
 - 有料アセットの無断使用
-- APIキーが必要なサービスへの認証なしアクセス
