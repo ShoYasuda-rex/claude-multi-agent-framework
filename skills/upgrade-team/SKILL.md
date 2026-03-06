@@ -1,6 +1,6 @@
 ---
-name: research-team
-description: 5視点（UX・ユーザー・競合・再構想・ビジュアル）で統合調査。実装モード付き
+name: upgrade-team
+description: プロダクト改善。5視点（UX・ユーザー・競合・再構想・ビジュアル）で調査し改善提案。実装モード付き
 tools: Read, Glob, Grep, Write, Edit, Bash, Task, WebSearch, WebFetch, AskUserQuestion
 user_invocable: true
 model: opus
