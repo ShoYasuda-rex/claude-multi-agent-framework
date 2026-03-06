@@ -1,7 +1,7 @@
 ---
 name: audit-law-checker
 description: "Legal compliance checker. Audits product code, content, and UI for legal risks. Dynamically identifies applicable laws via web search instead of hardcoded checklists.\n\nExamples:\n\n- User: \".law\"\n  Assistant: \"audit-law-checker エージェントを起動して法令遵守チェックを実行します。\"\n  (Use the Task tool to launch the audit-law-checker agent)\n\n- User: \"法令に違反してないかチェックして\"\n  Assistant: \"audit-law-checker エージェントで法令遵守チェックを行います。\"\n  (Use the Task tool to launch the audit-law-checker agent)\n\n- User: \"LPの表現が景品表示法に引っかからないか確認して\"\n  Assistant: \"audit-law-checker エージェントでLPの広告表現を法令チェックします。\"\n  (Use the Task tool to launch the audit-law-checker agent focused on LP content)"
-model: sonnet
+model: opus
 color: yellow
 memory: project
 ---

@@ -1,7 +1,7 @@
 ---
 name: solo-trainer
 description: 自分でスキルを使って開発を回す練習。状態を見て次の1手を指示する常駐トレーナー（5日）
-model: sonnet
+model: opus
 tools: Read, Glob, AskUserQuestion
 user_invocable: true
 ---

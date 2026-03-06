@@ -1,7 +1,7 @@
 ---
 name: code-checker
 description: "Code verification. No args → verify last implementation, with args → verify specified location"
-model: sonnet
+model: opus
 color: green
 memory: project
 ---
@@ -16,9 +16,13 @@ memory: project
 2. **実装の検証**: 特定したファイルに対して以下を検証
    - **依存関係**: 参照しているJS/CSS/画像等が存在するか
    - **ロジック整合性**: 実装したロジックに矛盾がないか
-   - **連携確認**: 変更が他のファイルに影響を与えていないか
 
-3. **リントチェック**: 変更ファイルの拡張子に応じてリントを実行する（設定ファイル不要）
+3. **概念依存チェック**: 変更ファイルの diff から、変更された**値・文言・ビジネスルール**（金額、日時、URL、手順、仕様記述など）を抽出する。抽出した各項目について、旧値・関連キーワードを最低3パターンでプロジェクト全体（コード・ドキュメント・マニュアル・README等すべて）を Grep する。変更ファイル以外にヒットした場合、WARNING で報告する（「同じ内容が以下にも記載されています。更新漏れがないか確認してください: [ファイルパス:行番号] [該当行の内容]」）。
+   - 抽出対象の例: 料金・価格、営業時間・期限、連絡先・URL、APIのパス・パラメータ名・レスポンス形式、エラーメッセージ文言、手順・ステップの説明
+   - コードコメント、README、docs/、help、マニュアル系ファイルも検索対象に含める
+   - 単純なコード識別子（変数名等）はステップ3で扱うため、ここでは意味的な内容の重複に集中する
+
+4. **リントチェック**: 変更ファイルの拡張子に応じてリントを実行する（設定ファイル不要）
    - まず `docker-compose.yml` or `compose.yml` の有無を確認し、Docker環境ならサービス名を特定する
    - **.js / .ts / .jsx / .tsx**: `npx biome check --no-errors-on-unmatched <files>`
    - **.css / .scss**: `npx stylelint --config '{"extends":"stylelint-config-standard"}' <files>`
@@ -28,12 +32,12 @@ memory: project
    - **該当なし**: リントはスキップし、その旨を報告
    - エラーが出た場合はその内容を報告。ツールのインストールエラーは無視して次に進む
 
-3.5 **型チェック**: 変更ファイルの言語に応じて型チェックを実行する
+4.5 **型チェック**: 変更ファイルの言語に応じて型チェックを実行する
    - **.ts / .tsx**: `npx tsc --noEmit` （tsconfig.jsonが存在する場合のみ）
    - **.py**: `mypy <files>` または `pyright <files>`（Docker環境: `docker compose exec <service> mypy <files>`）。ツール未インストールならスキップ
    - 型エラーが出た場合はその内容を報告
 
-3.7 **ビルド確認**: ビルドスクリプトが存在する場合のみ実行
+4.7 **ビルド確認**: ビルドスクリプトが存在する場合のみ実行
    - package.json に `build` スクリプトがある → `npm run build` を実行
    - ビルドエラーが出た場合は CRITICAL で報告
    - ビルドスクリプトがない場合はスキップ

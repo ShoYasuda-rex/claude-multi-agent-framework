@@ -1,6 +1,7 @@
 ---
 name: audit
 description: 監査系エージェントを一括実行（.cod / .sec / .arc / .law）
+model: opus
 user_invocable: true
 ---
 

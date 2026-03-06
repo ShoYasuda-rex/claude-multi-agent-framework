@@ -1,7 +1,7 @@
 ---
 name: deploy
 description: add・commit・pushを実行。「/deploy」で即実行、「/deploy safe」で安全チェック付き
-model: sonnet
+model: opus
 user_invocable: true
 ---
 
@@ -152,29 +152,32 @@ EOF
 - `git status` でリモートとの差分を確認
 - コンフリクトがある場合はユーザーに報告して指示を仰ぐ
 
-### 8.5. 【Safe モードのみ】デプロイ前ログチェック
-
-**Quick モードではこのステップをスキップする。**
-
-log-checker サブエージェント（subagent_type: log-checker）を起動し、本番ログの異常を確認する。
-
-- エラー率上昇・レスポンスタイム劣化・OOM等の予兆がないか
-- **異常なし** → ステップ 9 へ
-- **異常あり** → ユーザーに警告し、続行するか確認を取る
-  - 続行 → ステップ 9 へ
-  - 中止 → 処理を終了
-
 ### 9. push
 
 - CLAUDE.md の設定に従ってプッシュを実行: `git push {remote} {branch}`
   - 例: `git push origin master`, `git push heroku master`
 - 失敗した場合はエラー内容を報告
 
-### 10. 完了報告
+### 10. GitHub Actions ログ確認（Quick / Safe 共通）
+
+プッシュ先が GitHub（リモート: `origin`）の場合、**両モードで必ず実行する。**
+
+1. `gh run list --limit 1 --json status,conclusion,name,databaseId,headBranch` で最新のワークフロー実行を取得
+2. push 直後はまだ run が開始していない場合があるので、最新 run の `headBranch` が現在のブランチと一致するまで最大30秒（5秒間隔）待つ
+3. 該当 run を検出したら `status` を確認:
+   - **`in_progress` / `queued`** → `gh run watch {run_id}` で完了まで待機する
+   - **`completed`** → 次へ
+4. `conclusion` を確認:
+   - **`success`** → ステップ 11 へ
+   - **`failure`** → `gh run view {run_id} --log-failed` でエラーログを取得し、ユーザーに表示する。修正を提案する
+   - **`cancelled`** → キャンセルされた旨を報告
+
+`gh` コマンドが使えない場合（未インストール等）は、GitHub Actions のURLを案内してスキップする。
+
+### 11. 完了報告
 
 #### Quick モード
-- ブランチ名、コミット内容、プッシュ先を1行で報告
-- **FTPデプロイの場合**: GitHub Actions の実行状況を確認するよう案内を追加
+- ブランチ名、コミット内容、プッシュ先、Actions結果を1行で報告
 
 #### Safe モード
 
@@ -188,9 +191,6 @@ log-checker サブエージェント（subagent_type: log-checker）を起動し
 **Heroku の場合:**
 - ロールバック提案時は `heroku rollback` を使用
 - ロールバック実行後、再度log-checkerでエラー解消を確認
-
-**FTPデプロイの場合:**
-- GitHub Actions の実行状況を確認するよう案内を追加
 
 **その他 (GitHub, GitLab等):**
 - `git log --oneline -3` で最新コミットを表示

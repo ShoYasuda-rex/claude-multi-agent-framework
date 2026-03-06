@@ -1,6 +1,7 @@
 ---
 name: verify
 description: 実装後の品質チェックを一括実行（テスト・静的検証・動的検証を複数選択して並列実行）
+model: opus
 user_invocable: true
 ---
 

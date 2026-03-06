@@ -33,12 +33,7 @@ Step 1a（環境変数収集） + Step 2a（外部サービス特定）は独立
 
 #### 1a. コードから使用中の環境変数を自動収集
 
-Grep でプロジェクト全体をスキャンし、参照している環境変数を一覧化する:
-
-- `ENV['XXX']` / `ENV.fetch('XXX')` / `ENV.fetch("XXX"` / `ENV["XXX"]`（Ruby）
-- `process.env.XXX`（Node.js）
-- `os.environ['XXX']` / `os.getenv('XXX')`（Python）
-- `$_ENV['XXX']` / `getenv('XXX')`（PHP）
+Grep でプロジェクト全体をスキャンし、参照している環境変数を一覧化する。
 
 #### 1b. .env テンプレートの確認
 

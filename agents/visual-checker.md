@@ -38,18 +38,8 @@ memory: project
    done
    ```
 
-3. Common port assignments:
-   - 3000: React / Node.js / Rails
-   - 5500: VS Code Live Server
-   - 5173: Vite
-   - 8080: General purpose
-   - 8788: Wrangler (Cloudflare)
-   - 8000: Python / Django
-   - 4200: Angular
-   - 80: Default HTTP
-
-4. If multiple servers are found, use the first active one
-5. If no server is found, report to user and ask them to start one
+3. If multiple servers are found, use the first active one
+4. If no server is found, report to user and ask them to start one
 
 ### Step 3: Playwright準備
 - Playwrightでブラウザを起動
@@ -65,48 +55,11 @@ memory: project
   - Tablet: 768x1024
   - Mobile: 375x667
 
-### Step 5: Visual Inspection Checklist
-Analyze each screenshot for:
-- [ ] Layout overflow or horizontal scrolling issues
-- [ ] Overlapping elements or z-index problems
-- [ ] Missing images or broken image placeholders
-- [ ] Text truncation or overflow
-- [ ] Inconsistent spacing or alignment
-- [ ] Color contrast issues
-- [ ] Font rendering problems
-- [ ] Responsive breakpoint issues
-- [ ] Console errors visible in the page
-- [ ] Loading states stuck or incomplete
+### Step 5: Visual Inspection
+スクリーンショットを分析し、レイアウト崩れ・要素の欠落・表示異常を検出する。
 
 ### Step 6: Interaction Testing
-Test interactive elements using Playwright MCP tools:
-
-#### Button & Link Testing
-- Click buttons and verify expected behavior (navigation, modal open, state change)
-- Test all navigation links for correct routing
-- Verify disabled states are properly enforced
-
-#### Form Testing
-- Fill form fields and verify input acceptance
-- Submit forms and check validation messages
-- Test required field validation
-- Verify error message display
-
-#### Dynamic Element Testing
-- Test dropdown/select menus
-- Verify modal open/close behavior
-- Check accordion/tab switching
-- Test hover states and tooltips
-
-#### Interaction Checklist
-- [ ] Primary action buttons respond to clicks
-- [ ] Navigation links route correctly
-- [ ] Form submissions work as expected
-- [ ] Validation messages appear appropriately
-- [ ] Modals/dialogs open and close properly
-- [ ] Dropdowns display options correctly
-- [ ] Loading states appear during async operations
-- [ ] Error states display when operations fail
+インタラクション要素（ボタン・リンク・フォーム・モーダル等）の動作をPlaywright MCPツールで検証する。
 
 ### Step 6.5: バックエンド・API検証
 ページ操作中および操作後に、裏側の異常を検出する。

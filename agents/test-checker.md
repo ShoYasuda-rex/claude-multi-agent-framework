@@ -1,7 +1,7 @@
 ---
 name: test-checker
 description: "Analyze code changes and auto-detect/generate unit, integration, and E2E tests with duplicate checking and execution verification"
-model: sonnet
+model: opus
 color: cyan
 memory: project
 ---

@@ -160,6 +160,9 @@ AskUserQuestion で確認（multiSelect: true）:
 
 同じ題材で **プロンプトを微妙に変えた3パターン** を生成する（例: パレット違い、ビット深度違い、構図違い）。
 
+APIサーバーがプロンプト内容からフォルダ名・ファイル名を自動生成する。
+`output_dir` や `filename` の明示指定は不要（指定すれば上書き可能）。
+
 ```bash
 curl -s -X POST http://127.0.0.1:8188/batch \
   -H "Content-Type: application/json" \
@@ -167,6 +170,12 @@ curl -s -X POST http://127.0.0.1:8188/batch \
 ```
 
 ### 3-2. プレビューと選択
+
+生成完了後、出力フォルダをエクスプローラーで開く:
+
+```bash
+start "" "{output_dir}"
+```
 
 3枚すべてを Read ツールで表示し、AskUserQuestion で選択:
 
@@ -189,6 +198,8 @@ curl -s -X POST http://127.0.0.1:8188/batch \
 
 ### 4-A. バッチ生成
 
+テイスト確認と同じ命名規則で `output_dir` を指定する（`_taste` は付けない）。
+
 ```bash
 curl -s -X POST http://127.0.0.1:8188/batch \
   -H "Content-Type: application/json" \
@@ -205,6 +216,12 @@ curl -s http://127.0.0.1:8188/batch/{job_id}
 - `status: "completed"` → 続行
 
 ### 4-B. 結果プレビュー
+
+生成完了後、出力フォルダをエクスプローラーで開く:
+
+```bash
+start "" "{output_dir}"
+```
 
 全生成画像を Read ツールで表示。
 明らかに失敗した画像（崩れ・意図と大きく異なる）があれば、その分だけ再生成する。
