@@ -42,11 +42,13 @@ user_invocable: true
 
 - `.gitignore` がなければ「`/infra-setup` を先に実行してください」と案内して終了
 
-### 4. 機密ファイルチェック
+### 4. .gitignore 自動整備 & 機密ファイルチェック
 
-- `git status` で変更ファイル一覧を取得
-- 以下のパターンに該当するファイルがあれば **ステージングから除外し、ユーザーに警告**:
-  - `.env`, `.dev.vars`, `*.pem`, `*.key`, `credentials.*`, `secret*`
+- `git status` で untracked / 変更ファイル一覧を取得
+- 以下に該当するファイルを **ステージングから除外** し、`.gitignore` に未登録なら追記する:
+  - **機密ファイル**: `.env`, `.dev.vars`, `*.pem`, `*.key`, `credentials.*`, `secret*`（ユーザーに警告）
+  - **不要ファイル**: ツールキャッシュ・ログ・生成物など、コミットすべきでないもの（例: `.playwright-mcp/`, `.ruff_cache/`, `*.log`, `dist/`, `node_modules/`, `__pycache__/` 等）
+- 判断基準: そのファイル/ディレクトリが「実行環境やツールが自動生成するもので、リポジトリに含める必要がない」なら `.gitignore` に追加する
 
 ### 5. ステージング
 

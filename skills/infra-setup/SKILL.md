@@ -14,6 +14,8 @@ model: opus
 
 ## 前提チェック
 
+プロジェクトの `rules/learned.md` が存在する場合、インフラ・デプロイ関連エントリ（Heroku, Railway, port, dyno, worker, deploy, migration 等のキーワード）を確認し、該当するパターンがあればセットアップ中に事前にチェックすること。
+
 プロジェクトの `CLAUDE.md` を読む。
 
 - `infra-setup: done` → 「セットアップ済みです」と案内して終了
