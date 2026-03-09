@@ -1,9 +1,7 @@
 ---
 name: gen-arch
-description: コード実態からアーキテクチャドキュメントを自動生成
+description: コード実態からアーキテクチャドキュメントを自動生成（architecture.md・screen-flow.md・component-rules.md）
 model: sonnet
-tools: Read, Glob, Grep, Write, Task
-user_invocable: true
 ---
 
 # プロジェクト構造ドキュメント生成スキル

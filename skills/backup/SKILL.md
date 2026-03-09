@@ -21,7 +21,7 @@ user_invocable: true
 
 ### 2. git 初期化チェック
 
-- `.git` がなければ「`/infra-setup` を先に実行してください」と案内して終了
+- `.git` がなければ「`/infra` を先に実行してください」と案内して終了
 
 ### 2.5. dependabot.yml の確認・生成
 
@@ -40,7 +40,7 @@ user_invocable: true
 
 ### 3. `.gitignore` の存在チェック
 
-- `.gitignore` がなければ「`/infra-setup` を先に実行してください」と案内して終了
+- `.gitignore` がなければ「`/infra` を先に実行してください」と案内して終了
 
 ### 4. .gitignore 自動整備 & 機密ファイルチェック
 

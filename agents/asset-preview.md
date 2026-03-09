@@ -1,8 +1,7 @@
 ---
 name: asset-preview
-description: アセットプレビューHTMLを自動生成（画像・音声を一覧表示）
-model: opus
-user_invocable: true
+description: プロジェクトのアセット（画像・音声）をスキャンしてプレビューHTML生成
+model: sonnet
 ---
 
 # Asset Preview
@@ -91,7 +90,6 @@ CREDITS.md の内容がある場合、各アセットカードに出典元を表
 - 生成したHTMLを Playwright の `browser_navigate` で開く
 - `browser_take_screenshot` でフルページスクリーンショットを撮影
 - `check_log/screenshots/asset_preview.png` に保存
-- ユーザーに結果を表示
 
 ### 5. 完了報告
 

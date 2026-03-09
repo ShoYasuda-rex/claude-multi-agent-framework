@@ -2,7 +2,7 @@
 name: gen-ai-pixels
 description: ローカルFLUX.1サーバーで画像アセットをバッチ生成・配置・クレジット管理（ドット絵・アニメ・水彩・リアル等あらゆるスタイル対応）
 model: opus
-user_invocable: true
+user_invocable: false
 ---
 
 # Gen AI Pixels
@@ -357,7 +357,7 @@ img.src = 'assets/sprites/slime_green.png';
 
 ## 8. アセットプレビュー更新
 
-`/asset-preview` スキルを実行し、`public/assets/preview.html` を再生成する。
+Task（subagent_type: asset-preview）を起動し、`public/assets/preview.html` を再生成する。
 
 ---
 

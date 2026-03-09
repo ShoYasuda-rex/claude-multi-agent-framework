@@ -1,7 +1,7 @@
 ---
 name: fullstack-trainer
 description: フルスタック学習（中級）。DB+API+Workersを加えたプロダクトを1つ作り切る（2日）
-user_invocable: true
+user_invocable: false
 model: opus
 ---
 
@@ -11,7 +11,7 @@ feature-trainer修了者が「DB + 外部API + サーバーレス」を加えた
 
 ## 対象ユーザー
 
-- /feature-trainer を1回以上完走した人
+- `/learn` → 入門 を1回以上完走した人
 - フロントエンドだけでは物足りなくなった人
 - 「データベースって何？」「APIって何？」のレベルからOK
 - 次のステップとしてバックエンド技術を体験したい人
@@ -100,7 +100,7 @@ feature-trainerの修了を確認し、今回の学びを俯瞰する。
 #### 0-1. feature-trainerの振り返り
 
 ```
-前回の /feature-trainer お疲れさま。
+前回の入門（`/learn` → 入門）お疲れさま。
 
 あの時やった流れを覚えている？
 CORE → ARCH → 計画 → 実装 → 検証 → デプロイ。
@@ -975,8 +975,8 @@ feature-trainerで学んだ「環境構築は先にやる」。
 → 変わったのは「道具」だけ。「型」は全く同じ。
 
 ■ 次にやること
-- 別のテーマで /fullstack-trainer をもう1回やる（レベルを上げて）
-- 慣れたら /solo-trainer で自分でスキルを使って開発を回す練習
+- 別のテーマで `/learn` → 中級 をもう1回やる（レベルを上げて）
+- 慣れたら `/learn` → 実践 で自分でスキルを使って開発を回す練習
 - /kickoff から自分のフルスタックプロダクトを作ってみるのもいい
 - feature-trainerで作ったプロダクトにDB + APIを足してみるのもいい
 ```

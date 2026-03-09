@@ -2,7 +2,7 @@
 name: get-web-sounds
 description: フリーBGM・SEの調査→比較試聴→取得→配置→クレジット管理を自動化
 model: opus
-user_invocable: true
+user_invocable: false
 ---
 
 # Get Web Sounds
@@ -11,8 +11,8 @@ user_invocable: true
 ゲーム・Webアプリ・ランディングページなど用途を問わず使える。
 
 > **使い分け**:
-> `/get-web-sounds` — フリーBGM・SEを調達（ライセンス確認付き）
-> `/gen-ai-pixels` — ドット絵をローカルAIでバッチ生成
+> `/asset` → 音源 — フリーBGM・SEを調達（ライセンス確認付き）
+> `/asset` → 画像 — ドット絵をローカルAIでバッチ生成
 > 画像素材 — itch.io等で手動調達、またはブラウザ版AI（ChatGPT, Grok等）で生成
 
 ---
@@ -235,7 +235,7 @@ bgm.play();
 
 ## 9. アセットプレビュー更新
 
-`/asset-preview` スキルを実行し、`public/assets/preview.html` を再生成する。
+Task（subagent_type: asset-preview）を起動し、`public/assets/preview.html` を再生成する。
 
 ---
 

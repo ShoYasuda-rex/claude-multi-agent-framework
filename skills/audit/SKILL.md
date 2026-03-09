@@ -24,8 +24,9 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 | セキュリティ監査（.sec） | 脆弱性・設定ミス・攻撃ベクトル |
 | アーキテクチャ監査（.arc） | 設計判断の妥当性・リスク |
 | 法令チェック（.law） | 法令違反リスク |
+| ドキュメント生成 | コード実態から architecture.md・screen-flow.md・component-rules.md を生成 |
 
-- 「全部実行」が選ばれた場合 → 4つ全て実行（他の選択は無視）
+- 「全部実行」が選ばれた場合 → 監査4つを実行（ドキュメント生成は含まない）
 - それ以外 → 選択されたものだけ実行
 
 ---
@@ -34,12 +35,13 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 
 選択された監査を **Task ツールのサブエージェントとして並列起動** する:
 
-| 監査 | subagent_type |
+| 選択 | subagent_type |
 |------|--------------|
 | コード監査 | audit-code-checker |
 | セキュリティ監査 | audit-security-checker |
 | アーキテクチャ監査 | audit-architecture-checker |
 | 法令チェック | audit-law-checker |
+| ドキュメント生成 | gen-arch |
 
 - 全て `run_in_background: true` で並列実行する
 - 選択された Task 呼び出しを **1つのメッセージ内で同時に** 発行すること
@@ -65,6 +67,9 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 
 ### 法令チェック（.law）
 [結果の要約]
+
+### ドキュメント生成
+[生成したファイル一覧]
 ```
 
 - 実行しなかった監査のセクションは省略する

@@ -1,7 +1,7 @@
 ---
 name: feature-trainer
 description: フレームワーク学習（入門）。小さなフロントエンドプロダクトを1つ作り切る（1日）
-user_invocable: true
+user_invocable: false
 model: opus
 ---
 
@@ -503,7 +503,7 @@ Phase 2 で環境を作っておいたから、pushするだけ。
 2回目、3回目とやるうちに自然と身につく。
 
 ■ 次にやること
-- 別のテーマで /feature-trainer をもう1回やる（レベルを上げて）
+- 別のテーマで `/learn` → 入門 をもう1回やる（レベルを上げて）
 - 慣れたら /kickoff から自分のプロダクトを作ってみる
 ```
 

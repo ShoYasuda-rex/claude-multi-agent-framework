@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: add・commit・pushを実行。「/deploy」で即実行、「/deploy safe」で安全チェック付き
+description: add・commit・pushを実行。「/deploy」で即実行、「/deploy safe」で本番設定チェック+安全デプロイ
 model: opus
 user_invocable: true
 ---
@@ -73,7 +73,7 @@ ARCHITECTURE.md も存在しない場合、AskUserQuestion で以下を聞く:
 `git remote` を実行し、CLAUDE.md で指定されたリモート（例: `origin`）が存在するか確認する。
 
 - **リモートが存在する** → ステップ 2 へ進む
-- **リモートが存在しない** → 「`/infra-setup` を先に実行してください」と案内して終了
+- **リモートが存在しない** → 「`/infra` を先に実行してください」と案内して終了
 
 ---
 
@@ -86,7 +86,7 @@ CLAUDE.md の Git 運用セクションに「FTP」「GitHub Actions」「deploy
 **含まれている（FTPデプロイが必要）** → `.github/workflows/deploy.yml` が存在するか Glob で確認する:
 
 - **存在する** → ステップ 3 へ
-- **存在しない** → 「`/infra-setup` を先に実行してください（FTPデプロイのワークフロー生成が必要です）」と案内して終了
+- **存在しない** → 「`/infra` を先に実行してください（FTPデプロイのワークフロー生成が必要です）」と案内して終了
 
 ---
 
@@ -178,13 +178,25 @@ EOF
 - `git status` でリモートとの差分を確認
 - コンフリクトがある場合はユーザーに報告して指示を仰ぐ
 
-### 10. push
+### 10. 【Safe モードのみ】本番設定チェック（pre-deploy）
+
+**Quick モードではこのステップをスキップする。**
+
+release-checker サブエージェント（subagent_type: release-checker）を起動し、`phase: pre-deploy` で以下をチェック:
+
+- 環境変数の過不足（コード vs 本番）
+- 外部サービスの設定漏れ
+- マイグレーションの未実行
+
+❌ がある場合はユーザーに警告し、続行するか確認する。
+
+### 11. push
 
 - CLAUDE.md の設定に従ってプッシュを実行: `git push {remote} {branch}`
   - 例: `git push origin master`, `git push heroku master`
 - 失敗した場合はエラー内容を報告
 
-### 11. GitHub Actions ログ確認（Quick / Safe 共通）
+### 12. GitHub Actions ログ確認（Quick / Safe 共通）
 
 プッシュ先が GitHub（リモート: `origin`）の場合、**両モードで必ず実行する。**
 
@@ -200,7 +212,7 @@ EOF
 
 `gh` コマンドが使えない場合（未インストール等）は、GitHub Actions のURLを案内してスキップする。
 
-### 12. 完了報告
+### 13. 完了報告
 
 #### Quick モード
 - ブランチ名、コミット内容、プッシュ先、Actions結果を1行で報告
@@ -209,8 +221,9 @@ EOF
 
 以下を並列実行:
 
-1. **log-checker**: サブエージェント（subagent_type: log-checker）を起動し、デプロイ後の本番ログを確認する
-2. **プロセス稼働確認**: Procfile で定義された全プロセスが本番で実際に稼働しているか確認する（例: Heroku なら `heroku ps`）。未起動のプロセスがあればユーザーに警告する
+1. **release-checker（post-deploy）**: サブエージェント（subagent_type: release-checker）を `phase: post-deploy` で起動し、スモークテスト（ヘルスチェック・トップページ応答・SSL証明書）を実行する
+2. **log-checker**: サブエージェント（subagent_type: log-checker）を起動し、デプロイ後の本番ログを確認する
+3. **プロセス稼働確認**: Procfile で定義された全プロセスが本番で実際に稼働しているか確認する（例: Heroku なら `heroku ps`）。未起動のプロセスがあればユーザーに警告する
 
 - **両方異常なし** → 成功を報告
 - **異常あり** → エラー内容をユーザーに報告し、ロールバックを提案
