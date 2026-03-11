@@ -23,36 +23,17 @@ user-invocable: true
 
 - `.git` がなければ「`/infra` を先に実行してください」と案内して終了
 
-### 2.5. dependabot.yml の確認・生成
-
-- `.github/dependabot.yml` が存在しなければ作成:
-  - `mkdir -p .github`
-  - プロジェクトの技術スタックを探索し、該当する `package-ecosystem` を自動判定:
-    - `Gemfile` → `bundler`
-    - `package.json` → `npm`
-    - `composer.json` → `composer`
-    - `requirements.txt` / `Pipfile` → `pip`
-    - `go.mod` → `gomod`
-    - `Dockerfile` → `docker`
-    - `pom.xml` / `build.gradle` → `maven` / `gradle`
-    - `.github/workflows/` → `github-actions`
-  - 検出されたエコシステムごとに `updates` エントリを生成（schedule: weekly）
-
 ### 3. `.gitignore` の存在チェック
 
 - `.gitignore` がなければ「`/infra` を先に実行してください」と案内して終了
 
-### 4. .gitignore 自動整備 & 機密ファイルチェック
+### 4. 機密除外 + ステージング
 
-- `git status` で untracked / 変更ファイル一覧を取得
-- 以下に該当するファイルを **ステージングから除外** し、`.gitignore` に未登録なら追記する:
-  - **機密ファイル**: `.env`, `.dev.vars`, `*.pem`, `*.key`, `credentials.*`, `secret*`（ユーザーに警告）
-  - **不要ファイル**: ツールキャッシュ・ログ・生成物など、コミットすべきでないもの（例: `.playwright-mcp/`, `.ruff_cache/`, `*.log`, `dist/`, `node_modules/`, `__pycache__/` 等）
-- 判断基準: そのファイル/ディレクトリが「実行環境やツールが自動生成するもので、リポジトリに含める必要がない」なら `.gitignore` に追加する
+`~/.claude/scripts/git-safe-add.sh` を実行する（機密・不要ファイルの除外 + 個別git add + .gitignore自動更新）。
 
-### 5. ステージング
-
-- 変更ファイルを個別に `git add <file>` でステージングする（`git add -A` や `git add .` は使わない）
+- `NO_CHANGES=true` → 「コミットするものがありません」と報告して終了
+- `EXCLUDED=...` → 除外されたファイルを確認（機密ファイルがあればユーザーに警告）
+- スクリプトが存在しない・実行エラーの場合はスクリプトの内容を確認して修正する
 
 ### 6. コミット
 
@@ -65,7 +46,7 @@ user-invocable: true
 git commit -m "$(cat <<'EOF'
 コミットメッセージ
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```

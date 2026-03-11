@@ -31,6 +31,6 @@ AskUserQuestion で確認:
 
 | 選択 | 読み込むファイル |
 |------|----------------|
-| 入門 | `skills/learn/references/frontend-trainer.md` |
-| 中級 | `skills/learn/references/backend-trainer.md` |
-| 実践 | `skills/learn/references/solo-trainer.md` |
+| 入門 | `~/.claude/skills/learn/references/frontend-trainer.md` |
+| 中級 | `~/.claude/skills/learn/references/backend-trainer.md` |
+| 実践 | `~/.claude/skills/learn/references/solo-trainer.md` |

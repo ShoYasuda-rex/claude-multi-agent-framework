@@ -1,6 +1,7 @@
 ---
 name: design
 description: 5+パターンでデザイン比較 → 確定 → そのまま実装
+tools: Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot
 user-invocable: true
 model: opus
 ---

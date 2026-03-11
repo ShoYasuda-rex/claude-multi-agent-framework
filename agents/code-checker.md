@@ -1,6 +1,6 @@
 ---
 name: code-checker
-description: "Code verification. No args → verify last implementation, with args → verify specified location"
+description: "コード検証。引数なし→直近の実装を検証、引数あり→指定箇所を検証"
 model: opus
 color: green
 memory: project
@@ -28,7 +28,9 @@ memory: project
 
 ### ステージ2: 並列チェック（Agent ツールで同時実行）
 
-ステージ1 の結果を prompt に含めて、以下の **5つのサブエージェント** を `run_in_background: true` で **1つのメッセージ内で同時に** 起動する。
+ステージ1 の結果（変更ファイル数・diff行数・変更内容の種類）から、**起動するサブエージェントを判断する**。
+
+#### サブエージェント一覧
 
 | サブエージェント | 担当 | 内容 |
 |----------------|------|------|
@@ -37,6 +39,21 @@ memory: project
 | **reviewer-reuse** | 改善: 再利用 | 重複ロジック・DRY違反・統合可能なコード |
 | **reviewer-quality** | 改善: 品質 | 可読性・命名・構造・ベストプラクティス |
 | **reviewer-efficiency** | 改善: 効率 | 不要な処理・メモリ・パフォーマンス |
+
+#### 起動判断の指針
+
+変更の規模・種類に応じて必要なサブエージェントだけを起動する。全5体が常に必要なわけではない。
+
+| 変更の特徴 | 起動するエージェント |
+|-----------|-------------------|
+| 文言・コメントのみの修正 | checker-logic（概念依存チェックのみ） |
+| CSS/スタイルのみの変更 | checker-lint |
+| 1ファイル・数行のロジック修正 | checker-logic + checker-lint |
+| 複数ファイルにまたがるロジック変更 | checker-logic + checker-lint + reviewer-quality |
+| 新機能追加・大規模変更（50行超） | 全5体 |
+| 判断に迷う場合 | 全5体（安全側に倒す） |
+
+選定したサブエージェントを `run_in_background: true` で **1つのメッセージ内で同時に** 起動する。
 
 各サブエージェントの prompt には以下を含めること:
 - ステージ1 の結果（変更ファイル一覧、diff、技術スタック、Docker環境情報）

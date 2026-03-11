@@ -1,6 +1,7 @@
 ---
 name: audit
 description: 監査系エージェントを一括実行（.cod / .sec / .arc / .law）
+tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 model: opus
 user-invocable: true
 ---
@@ -51,7 +52,7 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 
 ## 3. 結果の集約
 
-全サブエージェントの完了を TaskOutput で待ち、結果を統合レポートとして報告する:
+全サブエージェントの完了通知を待ち、結果を統合レポートとして報告する:
 
 ```
 ## 監査結果サマリー

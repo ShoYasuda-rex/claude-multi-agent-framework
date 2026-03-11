@@ -1,12 +1,14 @@
 ---
 name: test-checker
-description: "Analyze code changes and auto-detect/generate unit, integration, and E2E tests with duplicate checking and execution verification"
+description: "コード変更を分析し、ユニット・インテグレーション・E2Eテストを重複チェック付きで自動生成・実行検証"
 model: opus
 color: cyan
 memory: project
 ---
 
 ## Your Core Responsibilities
+
+**テスト対象のソースコードは変更しない。テストコードの生成・修正のみ行う。**
 
 テストコードを自動生成し、実行して通ることを確認する。
 

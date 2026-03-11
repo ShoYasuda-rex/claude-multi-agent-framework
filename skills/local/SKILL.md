@@ -39,20 +39,18 @@ user-invocable: true
 
 サーバー起動前に、対象ポートが既に使用中でないか確認する。
 
-- Windows: `netstat -ano | findstr "LISTENING" | findstr ":{port}"` でポート使用状況を確認
-- Mac/Linux: `lsof -i :{port}` でポート使用状況を確認
-- **ポートが空いている場合** → ステップ3へ進む
-- **ポートが使用中の場合** → 以下を実行:
-  1. LISTENINGの結果から**重複を除いた全PIDを抽出**する（同じポートに複数プロセスが存在する場合がある）
-  2. 各PIDについてプロセス情報を取得する:
-     - Windows: `wmic process where ProcessId={pid} get CommandLine //FORMAT:LIST` でコマンドラインを取得
-     - Mac/Linux: `ps -p {pid} -o comm=,args=` でプロセス名とコマンドを取得
-  3. 取得した全プロセスの情報をユーザーにまとめて提示し、選択肢を出す:
-     - 「全プロセスを終了して同じポートで起動する」（推奨）
-     - 「別のポート（{port+1}）で起動する」
-     - 「キャンセル」
-  4. **終了する場合は、対象ポートの全PIDを `taskkill //PID {pid} //F`（Windows）/ `kill {pid}`（Mac/Linux）で終了する**
-  5. 終了後、`netstat`/`lsof` で**ポートが完全に解放されたことを確認してから**ステップ3へ進む（解放されていなければ1秒待って再確認、最大3回リトライ）
+`~/.claude/skills/local/scripts/port-check.sh {port}` を実行する。
+
+- **`STATUS=free`** → ステップ3へ進む
+- **`STATUS=in_use`** → `---PROCESSES---` 以降のプロセス情報をユーザーに提示し、選択肢を出す:
+  - 「全プロセスを終了して同じポートで起動する」（推奨）
+  - 「別のポート（{port+1}）で起動する」
+  - 「キャンセル」
+- **終了する場合** → `~/.claude/skills/local/scripts/port-check.sh {port} kill` を実行する
+  - `STATUS=freed` → ステップ3へ
+  - `STATUS=kill_failed` → ユーザーに報告
+
+スクリプトが存在しない・実行エラーの場合はスクリプトの内容を確認して修正する。
 
 ### 3. サーバー起動
 

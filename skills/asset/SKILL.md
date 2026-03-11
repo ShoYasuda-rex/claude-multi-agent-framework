@@ -31,6 +31,6 @@ AskUserQuestion で確認:
 
 | 選択 | 読み込むファイル |
 |------|----------------|
-| 音源 | `skills/asset/references/get-web-sounds.md` |
-| 画像 | `skills/asset/references/gen-ai-images.md` |
-| パーティクル | `skills/asset/references/gen-particles.md` |
+| 音源 | `~/.claude/skills/asset/references/get-web-sounds.md` |
+| 画像 | `~/.claude/skills/asset/references/gen-ai-images.md` |
+| パーティクル | `~/.claude/skills/asset/references/gen-particles.md` |

@@ -134,15 +134,14 @@ CLAUDE.md の Git 運用セクションに「FTP」「GitHub Actions」「deploy
 
 ### 6〜7. 【Safe モードのみ】安全バリデーション + 差分確認
 
-**Quick モードではスキップ。** Safe モードの場合、`references/safe.md` を Read で読み込み、Steps 6〜7 に従って実行する。
+**Quick モードではスキップ。** Safe モードの場合、`~/.claude/skills/deploy/references/safe.md` を Read で読み込み、Steps 6〜7 に従って実行する。
 
 ### 8. add & commit
 
-- 変更ファイルを個別に `git add <file>` でステージング（`git add -A` / `git add .` は使わない）
-- 以下に該当するファイルは **ステージングしない** 。`.gitignore` に未登録なら追記して恒久的にブロックする:
-  - **機密ファイル**: `.env`, `credentials`, `*.key`, `*.pem`, `secret*` 等
-  - **不要ファイル**: ツールキャッシュ・ログ・生成物（例: `.playwright-mcp/`, `.ruff_cache/`, `*.log`, `dist/`, `node_modules/`, `__pycache__/` 等）
-- 判断基準: 実行環境やツールが自動生成するもので、リポジトリに含める必要がないもの
+- `~/.claude/scripts/git-safe-add.sh` を実行する（機密・不要ファイルの除外 + 個別git add + .gitignore自動更新）
+  - `NO_CHANGES=true` → 「変更なし」と報告して終了
+  - `EXCLUDED=...` → 除外されたファイルを確認（機密ファイルがあればユーザーに警告）
+  - スクリプトが存在しない・実行エラーの場合はスクリプトの内容を確認して修正する
 - 変更内容からコミットメッセージを自動生成し、確認なしでコミットする
 - HEREDOC 形式で渡す:
 
@@ -150,14 +149,14 @@ CLAUDE.md の Git 運用セクションに「FTP」「GitHub Actions」「deploy
 git commit -m "$(cat <<'EOF'
 コミットメッセージ
 
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```
 
 ### 9〜10. 【Safe モードのみ】同期チェック + 本番設定チェック
 
-**Quick モードではスキップ。** Safe モードの場合、`references/safe.md` を Read で読み込み、Steps 9〜10 に従って実行する。
+**Quick モードではスキップ。** Safe モードの場合、`~/.claude/skills/deploy/references/safe.md` を Read で読み込み、Steps 9〜10 に従って実行する。
 
 ### 11. push
 
@@ -169,17 +168,15 @@ EOF
 
 プッシュ先が GitHub（リモート: `origin`）の場合、**両モードで必ず実行する。**
 
-1. `gh run list --limit 1 --json status,conclusion,name,databaseId,headBranch` で最新のワークフロー実行を取得
-2. push 直後はまだ run が開始していない場合があるので、最新 run の `headBranch` が現在のブランチと一致するまで最大30秒（5秒間隔）待つ
-3. 該当 run を検出したら `status` を確認:
-   - **`in_progress` / `queued`** → `gh run watch {run_id}` で完了まで待機する
-   - **`completed`** → 次へ
-4. `conclusion` を確認:
-   - **`success`** → ステップ 12 へ
-   - **`failure`** → `gh run view {run_id} --log-failed` でエラーログを取得し、ユーザーに表示する。修正を提案する
-   - **`cancelled`** → キャンセルされた旨を報告
+`~/.claude/skills/deploy/scripts/gh-actions-wait.sh {branch}` を実行する。
 
-`gh` コマンドが使えない場合（未インストール等）は、GitHub Actions のURLを案内してスキップする。
+結果に応じた対応:
+- **`CONCLUSION=success`** → ステップ 13 へ
+- **`CONCLUSION=failure`** → `---FAILED_LOG---` 以降のエラーログをユーザーに表示し、修正を提案する
+- **`CONCLUSION=cancelled`** → キャンセルされた旨を報告
+- **`STATUS=no_gh_cli`** / **`STATUS=not_authenticated`** → MESSAGE の内容を案内してスキップ
+- **`STATUS=no_run_found`** → ワークフロー未検出の旨を報告してスキップ
+- スクリプトが存在しない・実行エラーの場合はスクリプトの内容を確認して修正する
 
 ### 13. 完了報告
 
@@ -187,7 +184,7 @@ EOF
 - ブランチ名、コミット内容、プッシュ先、Actions結果を1行で報告
 
 #### Safe モード
-`references/safe.md` を Read で読み込み、Step 13 に従って実行する。
+`~/.claude/skills/deploy/references/safe.md` を Read で読み込み、Step 13 に従って実行する。
 
 ## 禁止事項
 
