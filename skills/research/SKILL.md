@@ -2,7 +2,7 @@
 name: research
 description: 調査の窓口（テーマ調査・プロダクト改善調査）
 model: opus
-user_invocable: true
+user-invocable: true
 ---
 
 # /research
@@ -19,8 +19,8 @@ AskUserQuestion で確認:
 
 | label | description |
 |-------|------------|
-| テーマを調査 | 任意のテーマを多角的に並列調査し、レポートを `.reports/` に出力 |
-| プロダクトを改善 | 5視点（UX・ユーザー・競合・再構想・ビジュアル）で並列調査し、改善レポートを `.reports/` に出力 |
+| テーマを調査 | 任意のテーマを多角的に並列調査し、レポートを `../reports/{プロジェクト名}/` に出力 |
+| プロダクトを改善 | 5視点（UX・ユーザー・競合・再構想・ビジュアル）で並列調査し、改善レポートを `../reports/{プロジェクト名}/` に出力 |
 
 ---
 
@@ -30,5 +30,5 @@ AskUserQuestion で確認:
 
 | 選択 | 読み込むファイル |
 |------|----------------|
-| テーマを調査 | `skills/research-team/SKILL.md` |
-| プロダクトを改善 | `skills/upgrade-team/SKILL.md` |
+| テーマを調査 | `skills/research/references/theme.md` |
+| プロダクトを改善 | `skills/research/references/upgrade.md` |

@@ -2,7 +2,7 @@
 name: audit
 description: 監査系エージェントを一括実行（.cod / .sec / .arc / .law）
 model: opus
-user_invocable: true
+user-invocable: true
 ---
 
 # /audit — 一括監査
@@ -41,7 +41,7 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 | セキュリティ監査 | audit-security-checker |
 | アーキテクチャ監査 | audit-architecture-checker |
 | 法令チェック | audit-law-checker |
-| ドキュメント生成 | gen-arch |
+| ドキュメント生成 | architecture-generator |
 
 - 全て `run_in_background: true` で並列実行する
 - 選択された Task 呼び出しを **1つのメッセージ内で同時に** 発行すること

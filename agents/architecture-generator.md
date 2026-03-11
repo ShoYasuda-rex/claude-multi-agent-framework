@@ -1,5 +1,5 @@
 ---
-name: gen-arch
+name: architecture-generator
 description: コード実態からアーキテクチャドキュメントを自動生成（architecture.md・screen-flow.md・component-rules.md）
 model: sonnet
 ---

@@ -1,9 +1,3 @@
----
-name: fullstack-trainer
-description: フルスタック学習（中級）。DB+API+Workersを加えたプロダクトを1つ作り切る（2日）
-user_invocable: false
-model: opus
----
 
 # /fullstack-trainer
 

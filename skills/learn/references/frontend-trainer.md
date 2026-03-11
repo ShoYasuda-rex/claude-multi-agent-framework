@@ -1,9 +1,3 @@
----
-name: feature-trainer
-description: フレームワーク学習（入門）。小さなフロントエンドプロダクトを1つ作り切る（1日）
-user_invocable: false
-model: opus
----
 
 # /feature-trainer
 

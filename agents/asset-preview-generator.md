@@ -1,5 +1,5 @@
 ---
-name: asset-preview
+name: asset-preview-generator
 description: プロジェクトのアセット（画像・音声）をスキャンしてプレビューHTML生成
 model: sonnet
 ---

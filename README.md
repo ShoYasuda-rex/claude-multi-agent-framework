@@ -78,17 +78,17 @@
 │   ├── test-checker.md      log-checker.md
 │   ├── audit-code-checker.md   audit-security-checker.md
 │   ├── audit-architecture-checker.md  audit-law-checker.md
-│   ├── asset-preview.md     release-checker.md
-│   └── gen-arch.md
-├── skills/           # スキル定義（22種、うち user_invocable 14種）
+│   ├── asset-preview-generator.md     release-checker.md
+│   └── architecture-generator.md
+├── skills/           # スキル定義（16種 + 窓口内references 8種）
 │   ├── kickoff/        design/         local/
 │   ├── parallel/       verify/         audit/
 │   ├── deploy/         backup/         rollback/
-│   ├── infra/
-│   ├── research/       debate/         asset/         learn/    ← 窓口スキル
-│   ├── research-team/  upgrade-team/                            ← /research 経由
-│   ├── get-web-sounds/ gen-ai-pixels/  gen-particles/           ← /asset 経由
-│   ├── feature-trainer/ fullstack-trainer/ solo-trainer/         ← /learn 経由
+│   ├── infra/          debate/         debate-join/
+│   ├── skill-check/
+│   ├── asset/          ← 窓口（references/: sounds, ai-images, particles）
+│   ├── research/       ← 窓口（references/: theme, upgrade）
+│   ├── learn/          ← 窓口（references/: frontend-trainer, fullstack-trainer, solo-trainer）
 ├── docs/             # フロー詳細ドキュメント
 ├── CLAUDE.md         # 共通ルール
 └── settings.json

@@ -2,7 +2,7 @@
 name: learn
 description: 開発フロー学習の窓口（入門・中級・実践）
 model: opus
-user_invocable: true
+user-invocable: true
 ---
 
 # /learn
@@ -31,6 +31,6 @@ AskUserQuestion で確認:
 
 | 選択 | 読み込むファイル |
 |------|----------------|
-| 入門 | `skills/feature-trainer/SKILL.md` |
-| 中級 | `skills/fullstack-trainer/SKILL.md` |
-| 実践 | `skills/solo-trainer/SKILL.md` |
+| 入門 | `skills/learn/references/frontend-trainer.md` |
+| 中級 | `skills/learn/references/backend-trainer.md` |
+| 実践 | `skills/learn/references/solo-trainer.md` |

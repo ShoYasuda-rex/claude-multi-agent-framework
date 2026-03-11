@@ -2,7 +2,7 @@
 name: backup
 description: gitローカルコミット（pushなし）
 model: haiku
-user_invocable: true
+user-invocable: true
 ---
 
 # Backup（ローカルコミット）

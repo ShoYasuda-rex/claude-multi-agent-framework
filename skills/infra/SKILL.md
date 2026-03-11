@@ -1,8 +1,8 @@
 ---
 name: infra
-description: 本番インフラの初期セットアップ（Git初期化・GitHub作成・プラットフォーム作成・デプロイ設定・環境変数テンプレート・ドメイン・DBバックアップ・初期データ・ブランチ戦略・エラーハンドリング・監視）
+description: 本番インフラの初期セットアップ（Git初期化・GitHub作成・プラットフォーム作成・デプロイ設定・ドメイン・DBバックアップ・初期データ・ブランチ戦略・エラーハンドリング・監視）
 tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Task
-user_invocable: true
+user-invocable: true
 model: opus
 ---
 
@@ -241,20 +241,7 @@ AskUserQuestion で「Secrets を登録しましたか？」と確認する:
 - 「はい、登録した」→ 次のステップへ
 - 「まだ」→ 登録を待つ
 
-### Step 5: 環境変数テンプレート
-
-#### 5a. コードから使用中の環境変数を自動収集
-
-Grep でプロジェクト全体をスキャンし、参照している環境変数を一覧化する。
-
-#### 5b. .env テンプレートの確認
-
-`.env.example` / `.env.sample` が存在するか Glob で**自動チェック**。
-
-**存在しない場合:**
-収集した環境変数から `.env.example` を生成し、ユーザー確認後に書き込む。
-
-### Step 6: ドメイン・SSL
+### Step 5: ドメイン・SSL
 
 #### 5a. 現状を自動チェック
 
@@ -280,7 +267,7 @@ AskUserQuestion で質問:
 
 ## Part A: 守りのインフラ
 
-Step 7（DBバックアップ確認） + Step 8（ブランチ確認） + Step 9a（エラーハンドラ確認）は独立しているため、Task で並列に自動チェックを実行する。結果を集約した後、未設定の項目を順にセットアップする。
+Step 7（DBバックアップ確認） + Step 8（ブランチ確認） + Step 9a（エラーハンドラ確認）の自動チェック部分は独立しているため、Bash ツールを **1つのメッセージ内で複数同時に** 呼び出して並列実行する。結果を集約した後、未設定の項目を順にセットアップする。
 
 ### Step 7: DBバックアップ
 
@@ -471,30 +458,14 @@ AskUserQuestion で質問:
 
 > Sentry と UptimeRobot の通知をどこに送りますか？
 
-選択肢: Pushover（Recommended） / Slack / メール通知のみ（デフォルト） / スキップ
+選択肢: メール通知（Recommended） / Slack / スキップ
 
-**「Pushover」の場合:**
+**「メール通知」の場合:**
 
-1. **Pushover アカウント作成を案内**（未登録の場合）:
-   1. https://pushover.net/ を開く
-   2. アカウントを作成（30日無料トライアル、以降は$5の買い切り）
-   3. ダッシュボードに表示される **User Key** をコピー
+Sentry・UptimeRobot ともにデフォルトでアカウントのメールアドレスに通知が届く。追加設定は不要だが、以下を確認する:
 
-2. **Sentry → Pushover 連携**:
-   1. Sentry ダッシュボードで **Settings → Integrations** を開く
-   2. 「Pushover」を検索してインストール
-   3. User Key を入力
-   4. **Alerts → Create Alert** でアラートルールを作成し、通知先に Pushover を選択
-
-3. **UptimeRobot → Pushover 連携**:
-   1. UptimeRobot ダッシュボードで **My Settings → Alert Contacts** を開く
-   2. 「Add Alert Contact」→ Type: **Pushover** を選択
-   3. User Key を入力して保存
-   4. 対象モニターの設定で、このアラートコンタクトを有効化
-
-AskUserQuestion で「通知設定は完了しましたか？」と確認:
-- 「はい」→ 次へ
-- 「まだ」→ 登録を待つ
+1. **Sentry**: Settings → Account → Notifications でメール通知が有効か確認を案内
+2. **UptimeRobot**: My Settings → Alert Contacts にメールが登録されているか確認を案内
 
 **「Slack」の場合:**
 - Sentry: Settings → Integrations → Slack を案内
@@ -503,6 +474,26 @@ AskUserQuestion で「通知設定は完了しましたか？」と確認:
 ---
 
 ## 完了: CLAUDE.md に記録
+
+### Git 運用セクションの追記
+
+CLAUDE.md に「Git 運用」セクションが**存在しない場合**、セットアップ中に確認したリモートとブランチ情報から自動生成して追記する。
+
+`git remote -v` と `git branch --show-current` の結果を使い、以下の形式で書き込む:
+
+```markdown
+## Git 運用
+
+- リモート: `{remote1}`（{platform1}: {url1}）, `{remote2}`（{platform2}: {url2}）
+- ブランチ戦略: `{branch}` に直接push（`git push {remote1} {branch}` && `git push {remote2} {branch}`）
+- 本番ブランチ: `{branch}`
+```
+
+- リモートが1つの場合は `&&` 以降を省略する
+- リモートが `heroku` の場合は platform を「Heroku」、`origin` で GitHub URL なら「GitHub: {user/repo}」とする
+- 既に「Git 運用」セクションがある場合はスキップする
+
+### infra-setup 記録
 
 CLAUDE.md に以下を記録する。`infra-setup-items` に `後で` が**1つでもあれば** `partial`、**なければ** `done` を設定する:
 
@@ -514,7 +505,6 @@ infra-setup-items:
   github-remote: {設定済み|既存}
   deploy-platform: {設定済み|既存|不要}
   deploy-config: {設定済み|スキップ|不要}
-  env-template: {設定済み|スキップ}
   domain-ssl: {設定済み|スキップ|後で}
   # 守りのインフラ
   db-backup: {設定済み|スキップ|不要}

@@ -2,7 +2,7 @@
 name: asset
 description: アセット調達の窓口（音源・画像・パーティクル）
 model: opus
-user_invocable: true
+user-invocable: true
 ---
 
 # /asset
@@ -31,6 +31,6 @@ AskUserQuestion で確認:
 
 | 選択 | 読み込むファイル |
 |------|----------------|
-| 音源 | `skills/get-web-sounds/SKILL.md` |
-| 画像 | `skills/gen-ai-pixels/SKILL.md` |
-| パーティクル | `skills/gen-particles/skill.md` |
+| 音源 | `skills/asset/references/get-web-sounds.md` |
+| 画像 | `skills/asset/references/gen-ai-images.md` |
+| パーティクル | `skills/asset/references/gen-particles.md` |

@@ -1,7 +1,7 @@
 ---
 name: design
 description: 5+パターンでデザイン比較 → 確定 → そのまま実装
-user_invocable: true
+user-invocable: true
 model: opus
 ---
 

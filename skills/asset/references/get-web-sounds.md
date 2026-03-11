@@ -1,9 +1,3 @@
----
-name: get-web-sounds
-description: フリーBGM・SEの調査→比較試聴→取得→配置→クレジット管理を自動化
-model: opus
-user_invocable: false
----
 
 # Get Web Sounds
 
@@ -235,7 +229,7 @@ bgm.play();
 
 ## 9. アセットプレビュー更新
 
-Task（subagent_type: asset-preview）を起動し、`public/assets/preview.html` を再生成する。
+Task（subagent_type: asset-preview-generator）を起動し、`public/assets/preview.html` を再生成する。
 
 ---
 

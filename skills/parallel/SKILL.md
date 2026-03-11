@@ -2,7 +2,7 @@
 name: parallel
 description: 並列実装。タスクを分割し、サブエージェントが同時に実装する
 tools: Read, Glob, Grep, Write, Edit, Bash, Task, AskUserQuestion, TaskCreate, TaskUpdate, TaskList, TeamCreate, SendMessage
-user_invocable: true
+user-invocable: true
 model: opus
 ---
 
@@ -26,7 +26,7 @@ model: opus
 
 ## フロー
 
-1. 指示をタスクに分割（1〜5個、同一ファイル編集は1エージェントにまとめる）
+1. 指示をタスクに分割（上限10個、同一ファイル編集は1エージェントにまとめる）
 2. 全エージェントを `isolation: "worktree"` で起動（1つのメッセージで並列起動）
 3. 完了したworktreeから順にmainへマージ
 4. 衝突があれば解決し、結果を統合してユーザーに報告

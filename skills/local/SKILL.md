@@ -3,7 +3,7 @@ name: local
 description: ローカル開発サーバーを起動してブラウザで開く
 model: haiku
 tools: Bash, Read, Glob, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_click
-user_invocable: true
+user-invocable: true
 ---
 
 # ローカル開発サーバー起動

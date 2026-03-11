@@ -1,9 +1,3 @@
----
-name: gen-particles
-description: パーティクルエフェクトの設計・生成・プレビュー・コード組み込みを自動化
-model: opus
-user_invocable: false
----
 
 # Gen Particles
 
@@ -283,7 +277,7 @@ Grep で既存のエフェクト呼び出しパターンを検索:
 
 ## 7. アセットプレビュー更新
 
-Task（subagent_type: asset-preview）を起動し、`public/assets/preview.html` を再生成する。
+Task（subagent_type: asset-preview-generator）を起動し、`public/assets/preview.html` を再生成する。
 
 ---
 

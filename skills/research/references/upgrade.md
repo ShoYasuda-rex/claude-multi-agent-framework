@@ -1,10 +1,3 @@
----
-name: upgrade-team
-description: プロダクト改善調査。5視点（UX・ユーザー・競合・再構想・ビジュアル）で並列調査しレポート出力
-tools: Read, Glob, Grep, Write, Edit, Bash, Task, WebSearch, WebFetch, AskUserQuestion
-user_invocable: false
-model: opus
----
 
 # /upgrade-team
 
@@ -30,14 +23,14 @@ model: opus
 
 1. ユーザーに調査テーマを確認（指定なしならプロダクト全体）
 2. docs/CORE.md があれば読む
-3. A/B/C/D/E を Task で**並列起動**（1つのメッセージで5つ同時）
+3. A/B/C/D/E のサブエージェント（subagent_type: general-purpose）を `run_in_background: true` で **1つのメッセージ内で同時に** 起動する
    - Eは前半（WebSearch調査）を先に進め、A完了後にスクショを見て現物評価する
    - Aは調査中にスクリーンショットを `check_log/screenshots/` に保存すること
-4. 結果を統合してレポートファイルを作成
+4. 全サブエージェントの完了を待ち、結果を統合してレポートファイルを作成
 
 ## レポートファイル
 
-- 保存先: プロジェクトルートの `.reports/` ディレクトリ（なければ作成）
+- 保存先: `../reports/{プロジェクト名}/` ディレクトリ（プロジェクト名 = カレントディレクトリのフォルダ名。なければ作成）
 - ファイル名: `{YYYYMMDD}_{HHmm}_upgrade.md`
   - 例: `20260309_1430_upgrade.md`
 - 内容は下記「統合報告フォーマット」に従う
