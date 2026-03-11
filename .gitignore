@@ -6,6 +6,8 @@
 !LICENSE
 !CLAUDE.md
 !settings.example.json
+!scripts/
+!scripts/**
 !agents/
 !agents/**
 !skills/
