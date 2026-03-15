@@ -1,6 +1,6 @@
 ---
 name: audit
-description: 監査系エージェントを一括実行（.cod / .sec / .arc / .law）
+description: 監査系エージェントを一括実行（.cod / .sec / .arc / .law / .dat）
 tools: Read, Glob, Grep, Bash, Agent, AskUserQuestion
 model: opus
 user-invocable: true
@@ -20,14 +20,15 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 
 | label | description |
 |-------|------------|
-| 全部実行（Recommended） | .cod + .sec + .arc + .law を一括実行 |
+| 全部実行（Recommended） | .cod + .sec + .arc + .law + .dat を一括実行 |
 | コード監査（.cod） | 未使用コード・デッドコード・構造の問題 |
 | セキュリティ監査（.sec） | 脆弱性・設定ミス・攻撃ベクトル |
 | アーキテクチャ監査（.arc） | 設計判断の妥当性・リスク |
 | 法令チェック（.law） | 法令違反リスク |
+| データ整合性（.dat） | DB制約・インデックス・モデル整合性・マイグレーション安全性 |
 | ドキュメント生成 | コード実態から architecture.md・screen-flow.md・component-rules.md を生成 |
 
-- 「全部実行」が選ばれた場合 → 監査4つを実行（ドキュメント生成は含まない）
+- 「全部実行」が選ばれた場合 → 監査5つを実行（ドキュメント生成は含まない）
 - それ以外 → 選択されたものだけ実行
 
 ---
@@ -42,6 +43,7 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 | セキュリティ監査 | audit-security-checker |
 | アーキテクチャ監査 | audit-architecture-checker |
 | 法令チェック | audit-law-checker |
+| データ整合性 | audit-data-checker |
 | ドキュメント生成 | architecture-generator |
 
 - 全て `run_in_background: true` で並列実行する
@@ -67,6 +69,9 @@ AskUserQuestion（multiSelect: true）で実行する監査を選ばせる:
 [結果の要約]
 
 ### 法令チェック（.law）
+[結果の要約]
+
+### データ整合性（.dat）
 [結果の要約]
 
 ### ドキュメント生成

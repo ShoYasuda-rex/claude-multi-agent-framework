@@ -1,6 +1,6 @@
 ---
 name: infra
-description: 本番インフラの初期セットアップ（Git初期化・GitHub作成・プラットフォーム作成・デプロイ設定・ドメイン・DBバックアップ・初期データ・ブランチ戦略・エラーハンドリング・監視）
+description: 本番インフラの初期セットアップ（Git初期化・GitHub作成・プラットフォーム作成・デプロイ設定・CI・ドメイン・DBバックアップ・初期データ・ブランチ戦略・エラーハンドリング・監視）
 tools: Read, Glob, Grep, Bash, Write, Edit, AskUserQuestion, Task
 user-invocable: true
 model: opus
@@ -267,7 +267,137 @@ AskUserQuestion で質問:
 
 ## Part A: 守りのインフラ
 
-Step 7（DBバックアップ確認） + Step 9（ブランチ確認） + Step 10a（エラーハンドラ確認）の自動チェック部分は独立しているため、Bash ツールを **1つのメッセージ内で複数同時に** 呼び出して並列実行する。結果を集約した後、未設定の項目を順にセットアップする。
+Step 6（CI確認） + Step 7（DBバックアップ確認） + Step 9（ブランチ確認） + Step 10a（エラーハンドラ確認）の自動チェック部分は独立しているため、Bash ツールを **1つのメッセージ内で複数同時に** 呼び出して並列実行する。結果を集約した後、未設定の項目を順にセットアップする。
+
+### Step 6: CI（GitHub Actions）
+
+push 時にテスト・ビルドを自動実行する安全網を設定する。
+
+#### 6a. 現状を自動チェック
+
+Glob で `.github/workflows/*.yml` の有無を確認する。
+
+- **CI用ワークフローが存在する** → スキップ
+- **deploy.yml のみ存在する**（Step 4c で生成した FTP デプロイ用）→ CI は未設定として扱う
+- **存在しない** → 6b へ
+
+#### 6b. 技術スタックの自動判定
+
+以下を Glob/Read で確認し、テスト・ビルドコマンドを特定する:
+
+| 検出対象 | テストコマンド | ビルドコマンド |
+|---------|-------------|-------------|
+| `package.json` の `scripts.test` | `npm test` | `npm run build`（scripts.build がある場合） |
+| `package.json` の `scripts.lint` | `npm run lint` | — |
+| `Gemfile` + `spec/` | `bundle exec rspec` | — |
+| `Gemfile` + `test/` | `bundle exec rails test` | — |
+| `requirements.txt` / `pyproject.toml` + `tests/` | `pytest` | — |
+| `go.mod` | `go test ./...` | `go build ./...` |
+
+#### 6c. ワークフロー生成
+
+検出した技術スタックに基づいて `.github/workflows/ci.yml` を生成する。
+
+**Node.js の場合:**
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [{本番ブランチ}]
+  pull_request:
+    branches: [{本番ブランチ}]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint  # scripts.lint がある場合のみ
+      - run: npm run build # scripts.build がある場合のみ
+      - run: npm test      # scripts.test がある場合のみ
+```
+
+**Rails の場合:**
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [{本番ブランチ}]
+  pull_request:
+    branches: [{本番ブランチ}]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+      RAILS_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - run: bin/rails db:setup
+      - run: bundle exec rspec  # or bundle exec rails test
+```
+
+**Python の場合:**
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [{本番ブランチ}]
+  pull_request:
+    branches: [{本番ブランチ}]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: pytest
+```
+
+**その他の技術スタック:**
+ARCHITECTURE.md の技術スタックに合わせて適切なワークフローを生成する。
+
+#### 6d. テストが存在しない場合
+
+テストコマンドが検出できない場合（`scripts.test` がない、`spec/` も `test/` もない等）:
+
+- リント・ビルドのみのワークフローを生成する（テストステップは省略）
+- 「テストは `/verify` のテストモードで生成できます」と案内する
+
+#### 6e. 確認
+
+生成した `ci.yml` の内容をユーザーに提示し、確認後に書き込む。
 
 ### Step 7: DBバックアップ
 
@@ -507,6 +637,7 @@ infra-setup-items:
   deploy-config: {設定済み|スキップ|不要}
   domain-ssl: {設定済み|スキップ|後で}
   # 守りのインフラ
+  ci: {設定済み|スキップ}
   db-backup: {設定済み|スキップ|不要}
   seed-data: {設定済み|スキップ|不要}
   branch-strategy: {設定済み|スキップ}
