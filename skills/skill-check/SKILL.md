@@ -1,7 +1,6 @@
 ---
 name: skill-check
 description: スキル設計レビュー（design）またはスキル実行後の挙動検証（run）の窓口
-model: sonnet
 tools: Read, Write, Glob, AskUserQuestion
 user-invocable: true
 ---

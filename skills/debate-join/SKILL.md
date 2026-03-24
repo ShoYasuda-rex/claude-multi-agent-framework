@@ -1,8 +1,7 @@
 ---
 name: debate-join
 description: debate議論に単発参加。引数なし→AIが1発言、引数user→ユーザー発言（常駐）
-model: sonnet
-tools: Read, Write, Edit, Glob
+tools: Read, Shell, Glob
 user-invocable: true
 ---
 
@@ -37,24 +36,34 @@ user-invocable: true
 }
 ```
 
+> **追記方法**: Shell の `Add-Content`（PowerShell）または `>>` でファイル末尾に append する。StrReplace / Write（全体上書き）は使用禁止。
+
 ---
 
 ## AIモード
 
-### 1. 入室
+### 1. 入室（参加者リスト更新はスキップ）
 
-参加者リストに自分のモデル名を追記する（例: `Claude-4-Opus`, `GPT-4o` 等、実際のモデル名を使用）。
+参加者リストは**編集しない**。ヘッダーの置換は他プロセスとの競合で既存内容を破壊するリスクがあるため、入室の記録は発言ヘッダー `### [モデル名]` で代替する。
 
 ### 2. フェーズ判定
 
-ファイルの内容から現在のフェーズを判定し、発言スタイルを決める。
+**追記の直前**にファイルを Read し直し、最新の内容でフェーズを判定する。
 
 - `## 収束` がない → 発散フェーズ（短文）
 - `## 収束` がある → 収束フェーズ（自由）
 
-### 3. 1発言を追記
+### 3. 1発言を append-only で追記
 
 `### [自分のモデル名]` の形式でファイル末尾に1発言だけ書く。
+
+**追記は必ず Shell の `Add-Content`（PowerShell）を使う。** StrReplace / Write（全体上書き）は使用禁止。これにより、他プロセスが同時に書き足した内容を消す事故を防ぐ。
+
+```powershell
+# 例
+$entry = "`n### [Claude-4-Opus]`n発言内容をここに書く。"
+Add-Content -Path $debateFile -Value $entry -Encoding UTF8
+```
 
 **発散フェーズ:**
 - 2〜3行の短文のみ。箇条書き・見出し・構造化は禁止。
@@ -77,3 +86,4 @@ user-invocable: true
 3. **フェーズのルールに従う。** 発散なら短文、収束なら流れに合わせる。
 4. **結論は書かない。** 結論を書くのは設計者（debate スキル側）の仕事。
 5. **日本語で発言。**
+6. **append-only。** ファイルへの書き込みは Shell の `Add-Content` / `>>` のみ。StrReplace・Write（全体上書き）は使用禁止。参加者リストのヘッダー編集もしない。

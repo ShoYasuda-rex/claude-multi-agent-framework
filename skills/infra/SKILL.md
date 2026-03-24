@@ -52,8 +52,9 @@ ARCHITECTURE.md がなければ「先に /kickoff で設計を固めよう」と
   1. `.gitignore` を確認・補完（機密ファイル・依存関係・ビルド成果物・OS/エディタファイル）
   2. `gh repo create {プロジェクト名} --private --source=. --remote=origin` を実行
      - `gh` CLI が使えない場合はユーザーに手動作成を依頼
-  3. 初期コミット: 現在のファイルを個別に `git add` & commit
-  4. 初期プッシュ: `git push -u origin master`
+  3. `gh repo edit --description "{プロジェクトの日本語説明}"` でリポジトリの説明を設定（ARCHITECTURE.md のプロダクト概要から簡潔に生成）
+  4. 初期コミット: 現在のファイルを個別に `git add` & commit
+  5. 初期プッシュ: `git push -u origin master`
 
 ### Step 3: デプロイプラットフォーム作成
 
